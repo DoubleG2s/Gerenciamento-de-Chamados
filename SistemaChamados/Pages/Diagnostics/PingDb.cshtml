@@ -1,0 +1,18 @@
+﻿@page
+@model SistemaChamados.Pages.Diagnostics.PingDbModel
+@{
+    ViewData["Title"] = "Ping DB";
+}
+
+<div class="card" style="padding:16px">
+    <h2 class="fw-bold mb-2">Diagnóstico do Banco</h2>
+    <p class="mb-2">
+        Status: <strong>@(Model.Connected ? "Conectado ✅" : "Falhou ❌")</strong>
+    </p>
+    @if (!Model.Connected && Model.Error is not null)
+    {
+        <pre class="mt-2" style="white-space:pre-wrap;background:#f8fafc;border:1px solid #e5e7eb;border-radius:8px;padding:10px">
+    @Model.Error
+            </pre>
+    }
+</div>

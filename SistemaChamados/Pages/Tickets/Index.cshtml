@@ -1,0 +1,87 @@
+﻿@page
+@model SistemaChamados.Pages.Tickets.IndexModel
+@using SistemaChamados.Models
+@using static SistemaChamados.Models.Enums
+@{
+    ViewData["Title"] = "Chamados";
+}
+
+<div class="page-header">
+    <h1>Central de Chamados</h1>
+    <p class="muted">Gerencie e acompanhe todos os chamados do sistema</p>
+</div>
+
+<div class="toolbar">
+    <div class="search">
+        <span class="icon">🔍</span>
+        <input type="text" class="search-input" placeholder="Buscar chamados..." />
+    </div>
+    <a class="btn btn-primary" asp-page="./Create"><span class="plus">+</span> Novo Chamado</a>
+</div>
+
+<div class="filter-chips">
+    <a class="chip @(Model.FiltrarPrioridade is null && Model.FiltrarStatus is null ? "chip-active" : "")" asp-page="./Index">Todos</a>
+    <a class="chip @(Model.FiltrarPrioridade == Enums.PriorityLevel.Baixa ? "chip-active" : "")" asp-page="./Index" asp-route-prioridade="Baixa">Baixa</a>
+    <a class="chip @(Model.FiltrarPrioridade == Enums.PriorityLevel.Média ? "chip-active" : "")" asp-page="./Index" asp-route-prioridade="Média">Média</a>
+    <a class="chip @(Model.FiltrarPrioridade == Enums.PriorityLevel.Alta ? "chip-active" : "")" asp-page="./Index" asp-route-prioridade="Alta">Alta</a>
+    <a class="chip @(Model.FiltrarPrioridade == Enums.PriorityLevel.Crítica ? "chip-active" : "")" asp-page="./Index" asp-route-prioridade="Crítica">Crítica</a>
+</div>
+
+@if (Model.Items.Any())
+{
+    <div class="grid">
+        @foreach (var t in Model.Items)
+        {
+            <a class="card ticket" asp-page="./Detalhes" asp-route-id="@t.Id">
+                <div class="ticket-title">@t.Titulo</div>
+                <div class="badges">
+                    <span class="badge status-@t.Status.ToString().ToLower()">@t.Status</span>
+                    <span class="badge pri-@(t.Prioridade switch {
+                        PriorityLevel.Baixa => "baixa",
+                        PriorityLevel.Média => "media",
+                        PriorityLevel.Alta => "alta",
+                        PriorityLevel.Crítica => "critica",
+                        _ => "media"
+                    })">@t.Prioridade
+                    </span>
+                </div>
+                <div class="meta">
+                    @if (t.Solicitante != null)
+                    {
+                        <span class="avatar">@t.Solicitante.Iniciais</span>
+                        <span>@t.Solicitante.Nome</span>
+                        <span>•</span>
+                    }
+                    @if (t.Categoria != null)
+                    {
+                        <span class="category">@t.Categoria.Nome</span>
+                        <span>•</span>
+                    }
+                    <span>@t.CriadoEm.ToLocalTime().ToString("dd/MM/yyyy")</span>
+                </div>
+            </a>
+        }
+    </div>
+    
+    <p class="muted mt-2">* Dados carregados do banco de dados PostgreSQL.</p>
+}
+else
+{
+    <div style="text-align: center; padding: 4rem 0; color: #64748b;">
+        <div style="font-size: 3rem; margin-bottom: 1rem;">📋</div>
+        <h3 style="color: #94a3b8; font-weight: normal; margin-bottom: 0.5rem;">Nenhum chamado encontrado</h3>
+        <p style="color: #cbd5e1; margin-bottom: 2rem;">
+            @if (Model.FiltrarPrioridade.HasValue || Model.FiltrarStatus.HasValue)
+            {
+                <span>Não há chamados para os filtros selecionados.</span>
+            }
+            else
+            {
+                <span>Ainda não há chamados cadastrados no sistema.</span>
+            }
+        </p>
+        <a class="btn btn-primary" asp-page="./Create">
+            <span class="plus">+</span> Criar Primeiro Chamado
+        </a>
+    </div>
+}

@@ -1,0 +1,103 @@
+﻿@page
+@model SistemaChamados.Pages.Configs.ConfigurarModel
+@{
+    ViewData["Title"] = "Configurações";
+}
+
+<div class="container-fluid config-page py-3">
+
+    <!-- Título + subtítulo -->
+    <div class="mb-3">
+        <h1 class="fw-bold display-6 mb-1">Configurações</h1>
+        <p class="text-muted mb-0">Gerencie suas preferências e configurações do sistema</p>
+    </div>
+
+    <!-- Tabs (barra) -->
+    <div class="bg-white border rounded-3 p-1 mb-3 shadow-sm">
+        <ul class="nav nav-pills nav-fill gap-1 config-tabs" id="configTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="tab-senha"
+                        data-bs-toggle="tab" data-bs-target="#pane-senha" type="button" role="tab"
+                        aria-controls="pane-senha" aria-selected="true">
+                    <span class="me-2">🔒</span> <span>Senha</span>
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="tab-tema"
+                        data-bs-toggle="tab" data-bs-target="#pane-tema" type="button" role="tab"
+                        aria-controls="pane-tema" aria-selected="false">
+                    <span class="me-2">🔆</span> <span>Tema</span>
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="tab-usuarios"
+                        data-bs-toggle="tab" data-bs-target="#pane-usuarios" type="button" role="tab"
+                        aria-controls="pane-usuarios" aria-selected="false">
+                    <span class="me-2">👥</span> <span>Usuários</span>
+                </button>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Conteúdo das tabs -->
+    <div class="tab-content">
+
+        <!-- PANE: SENHA (ativo) -->
+        <div class="tab-pane fade show active" id="pane-senha" role="tabpanel" aria-labelledby="tab-senha">
+            <div class="card shadow-sm border config-card">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="me-2 fs-5">🗝️</div>
+                        <h5 class="card-title fw-bold mb-0">Alterar Senha</h5>
+                    </div>
+                    <p class="text-muted mb-4">Atualize sua senha para manter sua conta segura</p>
+
+                    <form method="post" novalidate>
+                        <div class="mb-3">
+                            <label class="form-label fw-600">Senha Atual</label>
+                            <input type="password" class="form-control form-control-lg rounded-3 config-control"
+                                   placeholder="Digite sua senha atual" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-600">Nova Senha</label>
+                            <input type="password" class="form-control form-control-lg rounded-3 config-control"
+                                   placeholder="Digite sua nova senha" />
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-600">Confirmar Nova Senha</label>
+                            <input type="password" class="form-control form-control-lg rounded-3 config-control"
+                                   placeholder="Confirme sua nova senha" />
+                        </div>
+
+                        <button type="submit"
+                                class="btn btn-primary btn-lg w-100 d-flex justify-content-center">
+                            Alterar Senha
+                        </button>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANE: TEMA (placeholder só pra manter igual ao mock) -->
+        <div class="tab-pane fade" id="pane-tema" role="tabpanel" aria-labelledby="tab-tema">
+            <div class="card shadow-sm border config-card">
+                <div class="card-body p-4">
+                    <p class="text-muted mb-0">Configurações de tema (em breve).</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANE: USUÁRIOS (placeholder) -->
+        <div class="tab-pane fade" id="pane-usuarios" role="tabpanel" aria-labelledby="tab-usuarios">
+            <div class="card shadow-sm border config-card">
+                <div class="card-body p-4">
+                    <p class="text-muted mb-0">Gerenciamento de usuários (em breve).</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

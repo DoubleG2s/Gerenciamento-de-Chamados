@@ -1,0 +1,79 @@
+﻿@page
+@model SistemaChamados.Pages.Tickets.CreateModel
+@using SistemaChamados.Models
+@using static SistemaChamados.Models.Enums
+@{
+    ViewData["Title"] = "Criar Novo Chamado";
+}
+
+<!-- Backdrop + Dialog -->
+<div class="create-backdrop">
+    <div class="create-dialog" role="dialog" aria-modal="true" aria-labelledby="dlgTitle">
+        <a class="create-close" asp-page="./Index" aria-label="Fechar">×</a>
+
+        <h2 id="dlgTitle" class="create-title">Criar Novo Chamado</h2>
+
+        <form id="ticketForm" method="post" enctype="multipart/form-data" novalidate>
+            <!-- Título -->
+            <div class="form-group">
+                <label asp-for="Input.Titulo">Título do Chamado</label>
+                <input asp-for="Input.Titulo" class="form-control"
+                       placeholder="Descreva brevemente o problema..." />
+                <span asp-validation-for="Input.Titulo" class="text-danger"></span>
+            </div>
+
+            <!-- Linha: Categoria | Prioridade -->
+            <div class="form-row two">
+                <div class="form-group">
+                    <label asp-for="Input.CategoriaId">Categoria</label>
+                    <select asp-for="Input.CategoriaId" class="form-control form-select"
+                            asp-items="@(new SelectList(Model.Categorias, nameof(Categoria.Id), nameof(Categoria.Nome)))">
+                        <option value="">Selecione uma categoria</option>
+                    </select>
+                    <span asp-validation-for="Input.CategoriaId" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Input.Prioridade">Prioridade</label>
+                    <select asp-for="Input.Prioridade" class="form-control form-select" id="prioridadeSelect">
+                        <option value="@PriorityLevel.Baixa">Baixa</option>
+                        <option value="@PriorityLevel.Média" selected>Média</option>
+                        <option value="@PriorityLevel.Alta">Alta</option>
+                        <option value="@PriorityLevel.Crítica">Crítica</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Descrição -->
+            <div class="form-group">
+                <label asp-for="Input.Descricao">Descrição</label>
+                <textarea asp-for="Input.Descricao" rows="5" class="form-control"
+                          placeholder="Descreva detalhadamente o problema, incluindo passos para reproduzir, mensagens de erro, etc..."></textarea>
+                <span asp-validation-for="Input.Descricao" class="text-danger"></span>
+            </div>
+
+            <!-- Anexos -->
+            <div class="form-group">
+                <label>Anexos</label>
+                <div class="attach-row">
+                    <button type="button" class="btn btn-outline" id="btnAnexar">
+                        <span class="clip">📎</span> Anexar Arquivos
+                    </button>
+                    <input type="file" id="fileInput" name="Input.Anexos" multiple
+                           data-max-files="10" data-max-size-mb="10" class="file-hidden" />
+                    <span class="hint">PDF, DOC, TXT, imagens (máx. 10MB cada)</span>
+                </div>
+                <div id="filePreview" class="file-preview"></div>
+            </div>
+
+            <div class="create-actions">
+                <a asp-page="./Index" class="btn btn-secondary">Cancelar</a>
+                <button type="submit" class="btn btn-primary">Criar Chamado</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

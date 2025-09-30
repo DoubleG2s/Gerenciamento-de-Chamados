@@ -1,0 +1,71 @@
+﻿@{
+    var title = ViewData["Title"] as string ?? "Sistema de Chamados";
+}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@title - Sistema de Chamados</title>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" /> <!--BOOTSTRAP ANTES-->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" /> <!--CSS DEPOIS-->
+    
+</head>
+<body class="app">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div class="side-header">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 3h8v8H3V3Zm10 0h8v8h-8V3ZM3 13h8v8H3v-8Zm10 8v-8h8v8h-8Z" stroke="#111827" stroke-width="1.5" /></svg>
+            <span>Sistema de Chamados</span>
+        </div>
+
+        <div class="side-group">
+            <div class="side-title">Menu Principal</div>
+            <a asp-page="/Index" class="side-link @(Context.Request.Path.Value?.Equals("/Index", StringComparison.OrdinalIgnoreCase) == true || Context.Request.Path.Value == "/" ? "active" : null)">
+                <span class="i">🏠</span> Dashboard
+            </a>
+            <a asp-page="/Tickets/Index" class="side-link"><span class="i">🗂️</span> Todos os Chamados</a>
+            <a href="#" class="side-link"><span class="i">👤</span> Meus Chamados</a>
+            <a href="#" class="side-link"><span class="i">📊</span> Relatórios</a>
+        </div>
+
+        <div class="side-group">
+            <div class="side-title">Por Status</div>
+            <a asp-page="/Tickets/Index" asp-route-status="Aberto" class="side-link"><span class="dot dot-blue"></span> Abertos</a>
+            <a asp-page="/Tickets/Index" asp-route-status="Andamento" class="side-link"><span class="dot dot-amber"></span> Em Andamento</a>
+            <a asp-page="/Tickets/Index" asp-route-status="Resolvido" class="side-link"><span class="dot dot-green"></span> Resolvidos</a>
+            <a asp-page="/Tickets/Index" asp-route-status="Fechado" class="side-link"><span class="dot dot-gray"></span> Fechados</a>
+        </div>
+
+        <div class="side-group">
+            <div class="side-title">Sistema</div>
+            <a asp-page="/Configs/Configurar"
+               class="side-link @(Context.Request.Path.Value?.StartsWith("/Configs", StringComparison.OrdinalIgnoreCase) == true ? "active" : null)">
+                <span class="i">⚙️</span> Configurações
+            </a>
+        </div>
+
+    </aside>
+
+    <!-- TOPBAR -->
+    <header class="topbar2">
+        <div class="top-left">
+            <div class="app-name">Sistema de Chamados</div>
+        </div>
+    </header>
+
+    <!-- MAIN -->
+    <main class="content">
+        @RenderBody()
+    </main>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js"></script>
+    <script src="~/js/tickets.js" asp-append-version="true"></script>
+    @RenderSection("Scripts", required: false)
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

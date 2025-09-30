@@ -1,0 +1,170 @@
+﻿@page "/banco-de-dados-readonly"
+@model SistemaChamados.Pages.Diagnostics.TabelasVisuaisBdModel
+@{
+    ViewData["Title"] = "Banco de Dados (Somente Leitura)";
+}
+
+<div class="container-fluid py-3">
+    <div class="row g-3">
+        <!-- Sidebar: Tabelas -->
+        <div class="col-12 col-lg-3">
+            <div class="bg-white border rounded-3 p-2 shadow-sm">
+                <div class="px-2 py-2">
+                    <h5 class="mb-0 fw-bold">Tabelas</h5>
+                    <small class="text-muted">Somente leitura</small>
+                </div>
+                <div class="list-group list-group-flush">
+                    @if (Model.Tabelas.Count == 0)
+                    {
+                        <div class="px-3 py-2 text-muted">Nenhuma tabela encontrada.</div>
+                    }
+                    else
+                    {
+                        string? currentKey = null;
+                        foreach (var t in Model.Tabelas)
+                        {
+                            var key = t.Schema;
+                            if (key != currentKey)
+                            {
+                                currentKey = key;
+                                <div class="list-group-item bg-light fw-600 text-uppercase small">@t.Schema</div>
+                            }
+                            var active = (t.Schema == Model.SchemaSel && t.Name == Model.TabelaSel) ? "active" : "";
+                            <a class="list-group-item list-group-item-action @active"
+                               asp-page="/Diagnostics/TabelasVisuaisBd"
+                               asp-route-schema="@t.Schema"
+                               asp-route-tabela="@t.Name"
+                               asp-route-page="1"
+                               asp-route-pageSize="@Model.PageSize">
+                                @t.Name
+                            </a>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Conteúdo: dados da tabela selecionada -->
+        <div class="col-12 col-lg-9">
+            <div class="bg-white border rounded-3 shadow-sm">
+                <div class="p-3 border-bottom d-flex flex-wrap align-items-center gap-2">
+                    <div>
+                        <h5 class="mb-0 fw-bold">
+                            @if (Model.TabelaSel is not null)
+                            {
+                                <text>@Model.SchemaSel.@Model.TabelaSel</text>
+                            }
+                            else
+                            {
+                                <text>Selecione uma tabela</text>
+                            }
+                        </h5>
+                        <small class="text-muted">
+                            @if (Model.TabelaSel is not null)
+                            {
+                                <text>@Model.Colunas.Count coluna(s) • @Model.TotalLinhas texto</text>
+                            }
+                        </small>
+                    </div>
+                    @if (Model.TabelaSel is not null)
+                    {
+                        <div class="ms-auto d-flex align-items-center gap-2">
+                            <form method="get" class="d-flex align-items-center gap-2">
+                                <input type="hidden" name="schema" value="@Model.SchemaSel" />
+                                <input type="hidden" name="tabela" value="@Model.TabelaSel" />
+                                <input type="hidden" name="page" value="1" />
+                                <label class="text-muted small">Linhas por página</label>
+                                <select name="pageSize" class="form-select form-select-sm" onchange="this.form.submit()">
+                                    @{
+                                        int[] sizes = new[] { 10, 25, 50, 100 };
+                                        foreach (var s in sizes)
+                                        {
+                                            <option value="@s" selected="@(Model.PageSize == s)">
+                                                @s
+                                            </option>
+                                        }
+                                    }
+                                </select>
+                            </form>
+                        </div>
+                    }
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(Model.Error))
+                {
+                    <div class="alert alert-danger m-3">
+                        <strong>Erro:</strong> @Model.Error
+                    </div>
+                }
+                else if (Model.TabelaSel is null)
+                {
+                    <div class="p-3 text-muted">Escolha uma tabela ao lado para visualizar os dados.</div>
+                }
+                else
+                {
+                    <div class="table-responsive p-3">
+                        <table class="table table-sm table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    @foreach (var c in Model.Colunas)
+                                    {
+                                        <th>@c.Name <small class="text-muted">(@c.DataType)</small></th>
+                                    }
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.Linhas.Count == 0)
+                                {
+                                    <tr><td colspan="@Model.Colunas.Count" class="text-muted">Nenhum registro.</td></tr>
+                                }
+                                else
+                                {
+                                    foreach (var row in Model.Linhas)
+                                    {
+                                        <tr>
+                                            @foreach (var c in Model.Colunas)
+                                            {
+                                                var v = row.TryGetValue(c.Name, out var val) ? val : null;
+                                                <td>@(v is null ? "" : v)</td>
+                                            }
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Paginação -->
+                    <div class="d-flex justify-content-between align-items-center border-top p-3">
+                        <div class="small text-muted">
+                            Página @Model.Page
+                            @if (Model.TotalLinhas is not null)
+                            {
+                                <text> • Total: @Model.TotalLinhas</text>
+                            }
+                        </div>
+                        <div class="btn-group">
+                            <a class="btn btn-outline-secondary btn-sm @(Model.Page <= 1 ? "disabled" : "")"
+                               asp-page="/Diagnostics/TabelasVisuaisBd"
+                               asp-route-schema="@Model.SchemaSel"
+                               asp-route-tabela="@Model.TabelaSel"
+                               asp-route-page="@(Model.Page - 1)"
+                               asp-route-pageSize="@Model.PageSize">Anterior</a>
+
+                            <a class="btn btn-outline-secondary btn-sm @(Model.TemProximaPagina ? "" : "disabled")"
+                               asp-page="/Diagnostics/TabelasVisuaisBd"
+                               asp-route-schema="@Model.SchemaSel"
+                               asp-route-tabela="@Model.TabelaSel"
+                               asp-route-page="@(Model.Page + 1)"
+                               asp-route-pageSize="@Model.PageSize">Próxima</a>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="mt-2 text-muted small">
+                Somente leitura. Consultas executadas com <code>LIMIT</code>/<code>OFFSET</code>.
+            </div>
+        </div>
+    </div>
+</div>

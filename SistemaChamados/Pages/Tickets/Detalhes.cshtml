@@ -1,0 +1,207 @@
+﻿@page "{id:int}"
+@model SistemaChamados.Pages.Tickets.DetalhesModel
+@using static SistemaChamados.Models.Enums
+@{
+    ViewData["Title"] = $"Chamado #{Model.Ticket?.Id}";
+    var t = Model.Ticket;
+    string TkId = t is null ? "" : $"TK-{t.Id:000}";
+    string StatusClass(TicketStatus s) => s switch
+    {
+        TicketStatus.Aberto => "bg-primary",
+        TicketStatus.Andamento => "bg-warning text-dark",
+        TicketStatus.Resolvido => "bg-success",
+        TicketStatus.Fechado => "bg-secondary",
+        _ => "bg-primary"
+    };
+    string PriClass(PriorityLevel p) => p switch
+    {
+        PriorityLevel.Baixa => "bg-success",
+        PriorityLevel.Média => "bg-warning text-dark",
+        PriorityLevel.Alta => "bg-danger",
+        PriorityLevel.Crítica => "bg-dark",
+        _ => "bg-warning"
+    };
+}
+
+<div class="container-fluid px-3 px-md-4">
+    <!-- Voltar -->
+    <div class="mb-3">
+        <a asp-page="./Index" class="btn btn-link p-0 text-decoration-none text-muted d-inline-flex align-items-center gap-2">
+            <i class="bi bi-arrow-left"></i> Voltar para Chamados
+        </a>
+    </div>
+
+    @if (t is null)
+    {
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-6">
+                <div class="text-center py-5">
+                    <div class="mb-3" style="font-size:3rem">📋</div>
+                    <h2 class="text-muted mb-3">Chamado não encontrado</h2>
+                    <a asp-page="./Index" class="btn btn-primary">
+                        <i class="bi bi-arrow-left me-2"></i> Voltar
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Card principal do ticket -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <!-- Cabeçalho -->
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-start gap-3 border-bottom pb-3 mb-4">
+                    <div>
+                        <div class="badge bg-light text-muted font-monospace mb-2">@TkId</div>
+                        <h1 class="h3 fw-bold mb-0">@t.Titulo</h1>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <span class="badge @StatusClass(t.Status) px-3 py-2">@t.Status</span>
+                        <span class="badge @PriClass(t.Prioridade) px-3 py-2">@t.Prioridade</span>
+                    </div>
+                </div>
+
+                <!-- Grid de informações -->
+                <div class="row g-3 mb-4">
+                    <div class="col-12 col-sm-6 col-lg-4">
+                        <div class="card bg-light border-0">
+                            <div class="card-body p-3">
+                                <h6 class="card-subtitle mb-2 text-muted text-uppercase fw-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;">
+                                    Solicitante
+                                </h6>
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2"
+                                         style="width: 32px; height: 32px; font-size: 0.8rem; font-weight: 700;">
+                                        @t.Solicitante?.Iniciais
+                                    </div>
+                                    <span class="fw-medium">@t.Solicitante?.Nome</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-sm-6 col-lg-4">
+                        <div class="card bg-light border-0">
+                            <div class="card-body p-3">
+                                <h6 class="card-subtitle mb-2 text-muted text-uppercase fw-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;">
+                                    Última Atualização
+                                </h6>
+                                <div class="d-flex align-items-center text-muted">
+                                    <i class="bi bi-clock me-2"></i>
+                                    <span>@t.AtualizadoEm.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-sm-6 col-lg-4">
+                        <div class="card bg-light border-0">
+                            <div class="card-body p-3">
+                                <h6 class="card-subtitle mb-2 text-muted text-uppercase fw-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;">
+                                    Data de Abertura
+                                </h6>
+                                <div class="d-flex align-items-center text-muted">
+                                    <i class="bi bi-calendar me-2"></i>
+                                    <span>@t.CriadoEm.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-sm-6 col-lg-4">
+                        <div class="card bg-light border-0">
+                            <div class="card-body p-3">
+                                <h6 class="card-subtitle mb-2 text-muted text-uppercase fw-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;">
+                                    Atualizado por
+                                </h6>
+                                @if (t.Responsavel is not null)
+                                {
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center me-2"
+                                             style="width: 32px; height: 32px; font-size: 0.8rem; font-weight: 700;">
+                                            @t.Responsavel.Iniciais
+                                        </div>
+                                        <span class="fw-medium">@t.Responsavel.Nome</span>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Sistema</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-sm-6 col-lg-4">
+                        <div class="card bg-light border-0">
+                            <div class="card-body p-3">
+                                <h6 class="card-subtitle mb-2 text-muted text-uppercase fw-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;">
+                                    Categoria
+                                </h6>
+                                <div class="d-flex align-items-center text-muted">
+                                    <i class="bi bi-tag me-2"></i>
+                                    <span>@t.Categoria?.Nome</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Descrição -->
+                <div class="border-top pt-4 mb-4">
+                    <h5 class="fw-bold mb-3">Descrição</h5>
+                    <div class="bg-light p-3 rounded border" style="line-height: 1.6;">
+                        @t.Descricao
+                    </div>
+                </div>
+
+                <!-- Campo de resposta -->
+                <div class="mb-4">
+                    <textarea class="form-control bg-light border-0" rows="4"
+                          placeholder="Adicionar resposta" style="resize:vertical"></textarea>
+                </div>
+
+                <!-- Botões de ação -->
+                <div class="d-flex flex-column flex-sm-row gap-2">
+                    <button type="button" class="btn btn-primary">
+                        <i class="bi bi-reply me-1"></i> Responder
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary"
+                            data-bs-toggle="modal" data-bs-target="#statusModal">
+                        <i class="bi bi-gear me-1"></i> Alterar Situação
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Modal Bootstrap nativo -->
+<div class="modal fade" id="statusModal" tabindex="-1" aria-labelledby="statusModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+            <div class="modal-header bg-light">
+                <h6 class="modal-title fw-semibold" id="statusModalLabel">Alterar Status</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <form method="post" asp-page-handler="UpdateStatus" asp-route-id="@Model.Ticket?.Id">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label asp-for="Input.NovoStatus" class="form-label">Novo Status:</label>
+                        <select asp-for="Input.NovoStatus" class="form-select">
+                            <option value="@TicketStatus.Aberto">Aberto</option>
+                            <option value="@TicketStatus.Andamento">Em Andamento</option>
+                            <option value="@TicketStatus.Resolvido">Resolvido</option>
+                            <option value="@TicketStatus.Fechado">Fechado</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary btn-sm">Confirmar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

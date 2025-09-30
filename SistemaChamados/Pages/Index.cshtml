@@ -1,0 +1,61 @@
+﻿@page "/Dashboard"
+@model SistemaChamados.Pages.IndexModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="container py-4">
+    <div class="d-flex align-items-center mb-3">
+        <h1 class="h3 mb-0">Dashboard</h1>
+    </div>
+
+    <div class="row kpi-grid g-3">
+        <div class="col-12 col-sm-6 col-lg-3">
+            <a class="kpi-card kpi--total" href="/Tickets" aria-label="Ver todos os chamados">
+                <div class="kpi-left">
+                    <p class="kpi-title mb-1">Total</p>
+                    <p class="kpi-value mb-0">@Model.Total</p>
+                </div>
+                <div class="kpi-right">
+                    <i class="bi bi-funnel" aria-hidden="true"></i>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-3">
+            <a class="kpi-card kpi--abertos" href="/Tickets?status=Aberto" aria-label="Filtrar chamados Abertos">
+                <div class="kpi-left">
+                    <p class="kpi-title mb-1">Abertos</p>
+                    <p class="kpi-value mb-0">@Model.Abertos</p>
+                </div>
+                <div class="kpi-right">
+                    <i class="bi bi-funnel" aria-hidden="true"></i>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-3">
+            <a class="kpi-card kpi--andam" href="/Tickets?status=Andamento" aria-label="Filtrar chamados Em Andamento">
+                <div class="kpi-left">
+                    <p class="kpi-title mb-1">Em Andamento</p>
+                    <p class="kpi-value mb-0">@Model.EmAndamento</p>
+                </div>
+                <div class="kpi-right">
+                    <i class="bi bi-funnel" aria-hidden="true"></i>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-3">
+            <a class="kpi-card kpi--resolv" href="/Tickets?status=Resolvido" aria-label="Filtrar chamados Resolvidos">
+                <div class="kpi-left">
+                    <p class="kpi-title mb-1">Resolvidos</p>
+                    <p class="kpi-value mb-0">@Model.Resolvidos</p>
+                </div>
+                <div class="kpi-right">
+                    <i class="bi bi-funnel" aria-hidden="true"></i>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
