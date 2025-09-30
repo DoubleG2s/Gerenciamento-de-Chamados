@@ -4,7 +4,7 @@
 @{
     ViewData["Title"] = $"Chamado #{Model.Ticket?.Id}";
     var t = Model.Ticket;
-    string TkId = t is null ? "" : $"TK-{t.Id:000}";
+    string TkId = t is null ? "" : $"ID: #{t.Id:000}";
     string StatusClass(TicketStatus s) => s switch
     {
         TicketStatus.Aberto => "bg-primary",
