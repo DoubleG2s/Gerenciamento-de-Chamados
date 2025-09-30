@@ -42,6 +42,6 @@ app.MapGet("/ping-db", async (AppDbContext db) =>
 });
 
 // sua rota inicial
-app.MapGet("/", () => Results.Redirect("/Dashboard"));
+app.MapGet("/", () => Results.Redirect("/Início"));
 
 app.Run();
