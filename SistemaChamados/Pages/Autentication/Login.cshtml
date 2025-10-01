@@ -1,0 +1,302 @@
+﻿@page
+@model SistemaChamados.Pages.Autentication.LoginModel
+@{
+    Layout = null;
+    ViewData["Title"] = "Login";
+}
+<!DOCTYPE html>
+<html lang="pt-br" data-bs-theme="dark">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewData["Title"] - Sistema de Chamados</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <style>
+        /* ====== Fundo ====== */
+        body {
+            min-height: 100vh;
+            background: radial-gradient(60rem 35rem at 40% 15%, rgba(37, 99, 235, .12), transparent 40%), radial-gradient(35rem 25rem at 70% 80%, rgba(0, 0, 0, .35), transparent 40%), linear-gradient(180deg, #0b1220 0%, #0a0f1a 100%);
+            overflow: hidden;
+            display: grid;
+            place-items: center;
+        }
+
+        /* ====== Cartão ====== */
+        .login-card {
+            width: 100%;
+            max-width: 520px;
+            background: rgba(19, 25, 38, 0.9);
+            border: 1px solid rgba(255, 255, 255, .06);
+            border-radius: 18px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, .55), 0 0 0 1px rgba(255, 255, 255, .02) inset;
+            backdrop-filter: blur(8px);
+        }
+
+        .login-header {
+            text-align: center;
+        }
+
+        .brand-badge {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            margin-inline: auto;
+            background: rgba(37, 99, 235, .2);
+            border: 1px solid rgba(37, 99, 235, .25);
+            box-shadow: 0 10px 30px rgba(37, 99, 235, .35);
+        }
+
+            .brand-badge .ticket {
+                width: 36px;
+                height: 36px;
+                color: #93b4ff;
+            }
+
+        .form-label {
+            font-weight: 600;
+            color: #b6c2e2;
+        }
+
+        .form-control, .form-check-input {
+            background-color: #111827;
+            border-color: #232b3d;
+            color: #e5eaf5;
+        }
+
+            .form-control::placeholder {
+                color: #6e7a99;
+            }
+
+            .form-control:focus {
+                background-color: #0f172a;
+                border-color: #2a4bff;
+                box-shadow: 0 0 0 .2rem rgba(59,130,246,.25);
+                color: #eef2ff;
+            }
+
+            /* Estados de validação */
+            .form-control.is-invalid {
+                border-color: #dc3545;
+                box-shadow: 0 0 0 .2rem rgba(220, 53, 69, .25);
+            }
+
+        .invalid-feedback {
+            color: #ff6b6b;
+            font-size: 0.875rem;
+        }
+
+        .input-group-text {
+            background-color: #0f172a;
+            border-color: #232b3d;
+            color: #8ea5e3;
+        }
+
+        .link-muted {
+            color: #7ea2ff;
+            text-decoration: none;
+        }
+
+            .link-muted:hover {
+                color: #a8c2ff;
+            }
+
+        .btn-primary {
+            background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
+            border: 0;
+            box-shadow: 0 8px 24px rgba(37, 99, 235, .35);
+            position: relative;
+        }
+
+            .btn-primary:hover {
+                filter: brightness(1.05);
+                box-shadow: 0 10px 26px rgba(37, 99, 235, .45);
+            }
+
+            .btn-primary:disabled {
+                opacity: 0.7;
+                cursor: not-allowed;
+            }
+
+        .soft-divider {
+            border-top: 1px solid rgba(255, 255, 255, .06);
+        }
+
+        /* olho "mostrar senha" */
+        .btn-eye {
+            border: 0;
+            background: transparent;
+            color: #8ea5e3;
+            transition: color 0.2s ease;
+        }
+
+            .btn-eye:hover {
+                color: #b8c8ff;
+            }
+
+        /* Loading spinner */
+        .spinner-border-sm {
+            width: 1rem;
+            height: 1rem;
+        }
+    </style>
+</head>
+<body>
+
+    <main class="container px-3 my-5">
+        <div class="login-card p-4 p-sm-5">
+            <!-- Cabeçalho -->
+            <div class="login-header mb-4">
+                <div class="brand-badge mb-3">
+                    <!-- Ícone "ticket" em SVG inline -->
+                    <svg class="ticket" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M4 7a2 2 0 0 1 2-2h6.5a.5.5 0 0 1 .35.15l1.8 1.8a1 1 0 0 0 .7.29H18a2 2 0 0 1 2 2v2a1.5 1.5 0 0 0 0 3v2a2 2 0 0 1-2 2H8a.5.5 0 0 1-.35-.15L5.15 15.9a1 1 0 0 0-.7-.29H6a2 2 0 0 1-2-2V7z" />
+                    </svg>
+                </div>
+
+                <h1 class="h3 fw-bold text-primary mb-1">Sistema de Chamados</h1>
+                <p class="text-secondary mb-0">Acesse sua conta para gerenciar chamados</p>
+            </div>
+
+            <div class="soft-divider mb-4"></div>
+
+            <!-- MENSAGEM DE ERRO -->
+            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+            {
+                <div class="alert alert-danger py-2 mb-3" role="alert">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    @Model.ErrorMessage
+                </div>
+            }
+
+            <!-- Formulário -->
+            <form method="post" novalidate id="loginForm">
+                @Html.AntiForgeryToken()
+
+                <!-- Email -->
+                <div class="mb-3">
+                    <label class="form-label" asp-for="Input.Email">Email</label>
+                    <div class="input-group">
+                        <span class="input-group-text" id="icon-email" title="Email">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                <path d="M4 6h16a2 2 0 0 1 2 2v.4l-10 5.6L2 8.4V8a2 2 0 0 1 2-2zm0 4.2 7.6 4.25a1 1 0 0 0 .97 0L20 10.2V16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-5.8z" />
+                            </svg>
+                        </span>
+                        <input asp-for="Input.Email"
+                               class="form-control"
+                               placeholder="seu@email.com"
+                               aria-describedby="icon-email"
+                               autocomplete="email"
+                               required />
+                    </div>
+                    <span asp-validation-for="Input.Email" class="invalid-feedback d-block"></span>
+                </div>
+
+                <!-- Senha -->
+                <div class="mb-2">
+                    <label class="form-label" asp-for="Input.Senha">Senha</label>
+                    <div class="input-group">
+                        <span class="input-group-text" id="icon-lock" title="Senha">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                <path d="M12 2a5 5 0 0 1 5 5v3h1a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h1V7a5 5 0 0 1 5-5zm3 8V7a3 3 0 0 0-6 0v3h6z" />
+                            </svg>
+                        </span>
+                        <input asp-for="Input.Senha"
+                               type="password"
+                               class="form-control"
+                               placeholder="*******"
+                               aria-describedby="icon-lock btnToggle"
+                               autocomplete="current-password"
+                               required />
+                        <button type="button" class="btn-eye px-3" id="btnToggle" aria-label="Mostrar senha" title="Mostrar/ocultar senha">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" id="eyeIcon">
+                                <path d="M12 5C7 5 2.73 8.11 1 12c1.73 3.89 6 7 11 7s9.27-3.11 11-7c-1.73-3.89-6-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10z" />
+                            </svg>
+                        </button>
+                    </div>
+                    <span asp-validation-for="Input.Senha" class="invalid-feedback d-block"></span>
+                </div>
+
+                <!-- Lembrar / Esqueci -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div class="form-check">
+                        <input class="form-check-input" asp-for="Input.Lembrar" />
+                        <label class="form-check-label" asp-for="Input.Lembrar">Lembrar de mim</label>
+                    </div>
+                    <a class="link-muted small" href="#" tabindex="-1">Esqueci minha senha</a>
+                </div>
+
+                <!-- Botão -->
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-lg btn-primary" id="btnLogin">
+                        <span class="btn-text">Acessar Sistema</span>
+                        <span class="btn-loading d-none">
+                            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                            Entrando...
+                        </span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Mostrar/ocultar senha
+        (function () {
+            const btn = document.getElementById('btnToggle');
+            const input = document.querySelector('input[name="Input.Senha"]');
+            const eyeIcon = document.getElementById('eyeIcon');
+
+            if (!btn || !input || !eyeIcon) return;
+
+            btn.addEventListener('click', function () {
+                const isPassword = input.type === 'password';
+                input.type = isPassword ? 'text' : 'password';
+
+                // Atualizar ícone
+                eyeIcon.innerHTML = isPassword
+                    ? '<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/>' // olho cortado
+                    : '<path d="M12 5C7 5 2.73 8.11 1 12c1.73 3.89 6 7 11 7s9.27-3.11 11-7c-1.73-3.89-6-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"/>'; // olho normal
+
+                btn.setAttribute('aria-label', isPassword ? 'Ocultar senha' : 'Mostrar senha');
+            });
+        })();
+
+        // Loading state no botão
+        (function() {
+            const form = document.getElementById('loginForm');
+            const btn = document.getElementById('btnLogin');
+            const btnText = btn.querySelector('.btn-text');
+            const btnLoading = btn.querySelector('.btn-loading');
+
+            if (!form || !btn || !btnText || !btnLoading) return;
+
+            form.addEventListener('submit', function() {
+                btn.disabled = true;
+                btnText.classList.add('d-none');
+                btnLoading.classList.remove('d-none');
+
+                // Restaurar estado após 10 segundos (failsafe)
+                setTimeout(() => {
+                    btn.disabled = false;
+                    btnText.classList.remove('d-none');
+                    btnLoading.classList.add('d-none');
+                }, 10000);
+            });
+        })();
+
+        // Foco automático no primeiro campo
+        document.addEventListener('DOMContentLoaded', function() {
+            const emailInput = document.querySelector('input[name="Input.Email"]');
+            if (emailInput && !emailInput.value) {
+                emailInput.focus();
+            }
+        });
+    </script>
+</body>
+</html>

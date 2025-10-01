@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;        // <- necessário para AddDbContext/UseNpgsql
 using SistemaChamados.Data;                 // <- seu AppDbContext
 using SistemaChamados.Services;             // <- InMemoryTicketStore
+using Microsoft.AspNetCore.Authentication.Cookies; // <- Autenticação por Cookies
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +10,19 @@ builder.Services.AddRazorPages();
 
 // Mock store (singleton em memória)
 builder.Services.AddSingleton<InMemoryTicketStore>();
+
+builder.Services
+    .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(opt =>
+    {
+        opt.LoginPath = "/Autentication/Login";
+        opt.LogoutPath = "/Autentication/Logout";
+        opt.AccessDeniedPath = "/Autentication/Login";
+        opt.SlidingExpiration = true;
+        opt.ExpireTimeSpan = TimeSpan.FromHours(8);
+    });
+
+builder.Services.AddAuthorization();
 
 // EF Core + Npgsql usando DefaultConnection
 var connString = builder.Configuration.GetConnectionString("DefaultConnection")
@@ -31,6 +45,8 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+app.UseAuthentication(); // <- importante ser antes do UseAuthorization
+app.UseAuthorization(); // <- importante ser depois do UseAuthentication
 
 app.MapRazorPages();
 
@@ -41,7 +57,7 @@ app.MapGet("/ping-db", async (AppDbContext db) =>
     return Results.Ok(new { connected = ok });
 });
 
-// sua rota inicial
-app.MapGet("/", () => Results.Redirect("/Início"));
+// sua rota inicial -> página de Login
+app.MapGet("/", () => Results.Redirect("/Autentication/Login"));
 
 app.Run();

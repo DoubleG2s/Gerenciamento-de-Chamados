@@ -1,5 +1,8 @@
 ﻿@{
     var title = ViewData["Title"] as string ?? "Sistema de Chamados";
+    bool isUsuario = User.IsInRole("Usuario");
+    bool isTecnicoOrAdmin = User.IsInRole("Tecnico") || User.IsInRole("Admin");
+    bool isAdmin = User.IsInRole("Admin");
 }
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -8,10 +11,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@title - Sistema de Chamados</title>
 
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" /> <!--BOOTSTRAP ANTES-->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" /> <!--CSS DEPOIS-->
-    
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+
 </head>
 <body class="app">
     <!-- SIDEBAR -->
@@ -23,27 +26,70 @@
 
         <div class="side-group">
             <div class="side-title">Menu Principal</div>
-            <a asp-page="/Index" class="side-link @(Context.Request.Path.Value?.Equals("/Index", StringComparison.OrdinalIgnoreCase) == true || Context.Request.Path.Value == "/" ? "active" : null)">
-                <span class="i">🏠</span> Dashboard
+
+            @* Dashboard - apenas Técnico/Admin *@
+            @if (isTecnicoOrAdmin)
+            {
+                <a asp-page="/Index" class="side-link @(Context.Request.Path.Value?.Equals("/Index", StringComparison.OrdinalIgnoreCase) == true || Context.Request.Path.Value == "/" ? "active" : null)">
+                    <i class="bi bi-house-door i"></i> Dashboard
+                </a>
+            }
+
+            @* Todos os Chamados - apenas Técnico/Admin *@
+            @if (isTecnicoOrAdmin)
+            {
+                <a asp-page="/Tickets/Index" class="side-link @(Context.Request.Path.Value?.StartsWith("/Tickets/Index", StringComparison.OrdinalIgnoreCase) == true ? "active" : null)">
+                    <i class="bi bi-folder2-open i"></i> Todos os Chamados
+                </a>
+            }
+
+            @* Meus Chamados - redirecionamento inteligente *@
+            <a asp-page="@(isUsuario ? "/Tickets/UsuarioTickets" : "/Tickets/UsuarioTickets")"
+               class="side-link @(Context.Request.Path.Value?.StartsWith("/Tickets/UsuarioTickets", StringComparison.OrdinalIgnoreCase) == true ? "active" : null)">
+                <i class="bi bi-person-circle i"></i> Meus Chamados
             </a>
-            <a asp-page="/Tickets/Index" class="side-link"><span class="i">🗂️</span> Todos os Chamados</a>
-            <a href="#" class="side-link"><span class="i">👤</span> Meus Chamados</a>
-            <a href="#" class="side-link"><span class="i">📊</span> Relatórios</a>
+
+            @* Relatórios - apenas Técnico/Admin *@
+            @if (isTecnicoOrAdmin)
+            {
+                <a href="#" class="side-link">
+                    <i class="bi bi-bar-chart i"></i> Relatórios
+                </a>
+            }
         </div>
 
-        <div class="side-group">
-            <div class="side-title">Por Status</div>
-            <a asp-page="/Tickets/Index" asp-route-status="Aberto" class="side-link"><span class="dot dot-blue"></span> Abertos</a>
-            <a asp-page="/Tickets/Index" asp-route-status="Andamento" class="side-link"><span class="dot dot-amber"></span> Em Andamento</a>
-            <a asp-page="/Tickets/Index" asp-route-status="Resolvido" class="side-link"><span class="dot dot-green"></span> Resolvidos</a>
-            <a asp-page="/Tickets/Index" asp-route-status="Fechado" class="side-link"><span class="dot dot-gray"></span> Fechados</a>
-        </div>
+        @* Por Status - apenas Técnico/Admin *@
+        @if (isTecnicoOrAdmin)
+        {
+            <div class="side-group">
+                <div class="side-title">Por Status</div>
+                <a asp-page="/Tickets/Index" asp-route-status="Aberto" class="side-link">
+                    <span class="dot dot-blue"></span> Abertos
+                </a>
+                <a asp-page="/Tickets/Index" asp-route-status="Andamento" class="side-link">
+                    <span class="dot dot-amber"></span> Em Andamento
+                </a>
+                <a asp-page="/Tickets/Index" asp-route-status="Resolvido" class="side-link">
+                    <span class="dot dot-green"></span> Resolvidos
+                </a>
+                <a asp-page="/Tickets/Index" asp-route-status="Fechado" class="side-link">
+                    <span class="dot dot-gray"></span> Fechados
+                </a>
+            </div>
+        }
 
         <div class="side-group">
             <div class="side-title">Sistema</div>
+
+            @* Configurações - todos os usuários (mas com restrições internas) *@
             <a asp-page="/Configs/Configurar"
                class="side-link @(Context.Request.Path.Value?.StartsWith("/Configs", StringComparison.OrdinalIgnoreCase) == true ? "active" : null)">
-                <span class="i">⚙️</span> Configurações
+                <i class="bi bi-gear i"></i> Configurações
+            </a>
+
+            @* Logout - todos os usuários *@
+            <a asp-page="/Autentication/Logout" class="side-link">
+                <i class="bi bi-box-arrow-right i"></i> Sair
             </a>
         </div>
 
@@ -53,6 +99,15 @@
     <header class="topbar2">
         <div class="top-left">
             <div class="app-name">Sistema de Chamados</div>
+        </div>
+        <div class="top-right">
+            <div class="user-info">
+                <span class="text-muted">Bem-vindo,</span>
+                <strong>@User.Identity?.Name</strong>
+                <span class="badge bg-@(User.IsInRole("Admin") ? "danger" : User.IsInRole("Tecnico") ? "warning text-dark" : "primary") ms-2">
+                    @User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value
+                </span>
+            </div>
         </div>
     </header>
 

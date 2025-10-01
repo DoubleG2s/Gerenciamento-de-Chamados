@@ -1,5 +1,7 @@
-﻿@page "/Início"
+﻿@page "/Inicio"
 @model SistemaChamados.Pages.IndexModel
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
 @{
     ViewData["Title"] = "Dashboard";
 }

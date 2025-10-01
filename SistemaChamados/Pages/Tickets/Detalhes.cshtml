@@ -5,6 +5,11 @@
     ViewData["Title"] = $"Chamado #{Model.Ticket?.Id}";
     var t = Model.Ticket;
     string TkId = t is null ? "" : $"ID: #{t.Id:000}";
+
+    // Definir página de volta baseada no tipo de usuário
+    string voltarPage = User.IsInRole("Usuario") ? "/Tickets/UsuarioTickets" : "/Tickets/Index";
+    string voltarTexto = User.IsInRole("Usuario") ? "Voltar para Meus Chamados" : "Voltar para Chamados";
+
     string StatusClass(TicketStatus s) => s switch
     {
         TicketStatus.Aberto => "bg-primary",
@@ -24,10 +29,10 @@
 }
 
 <div class="container-fluid px-3 px-md-4">
-    <!-- Voltar -->
+    <!-- Voltar - Redirecionamento condicional -->
     <div class="mb-3">
-        <a asp-page="./Index" class="btn btn-link p-0 text-decoration-none text-muted d-inline-flex align-items-center gap-2">
-            <i class="bi bi-arrow-left"></i> Voltar para Chamados
+        <a asp-page="@voltarPage" class="btn btn-link p-0 text-decoration-none text-muted d-inline-flex align-items-center gap-2">
+            <i class="bi bi-arrow-left"></i> @voltarTexto
         </a>
     </div>
 
@@ -38,7 +43,7 @@
                 <div class="text-center py-5">
                     <div class="mb-3" style="font-size:3rem">📋</div>
                     <h2 class="text-muted mb-3">Chamado não encontrado</h2>
-                    <a asp-page="./Index" class="btn btn-primary">
+                    <a asp-page="@voltarPage" class="btn btn-primary">
                         <i class="bi bi-arrow-left me-2"></i> Voltar
                     </a>
                 </div>
@@ -156,52 +161,70 @@
                     </div>
                 </div>
 
-                <!-- Campo de resposta -->
-                <div class="mb-4">
-                    <textarea class="form-control bg-light border-0" rows="4"
-                          placeholder="Adicionar resposta" style="resize:vertical"></textarea>
-                </div>
+                <!-- Campo de resposta - apenas Técnico/Admin -->
+                @if (User.IsInRole("Tecnico") || User.IsInRole("Admin"))
+                {
+                    <div class="mb-4">
+                        <label for="respostaTextarea" class="form-label fw-bold">Adicionar Resposta:</label>
+                        <textarea id="respostaTextarea" class="form-control bg-light border-0" rows="4"
+                          placeholder="Digite sua resposta para o chamado..." style="resize:vertical"></textarea>
+                    </div>
 
-                <!-- Botões de ação -->
-                <div class="d-flex flex-column flex-sm-row gap-2">
-                    <button type="button" class="btn btn-primary">
-                        <i class="bi bi-reply me-1"></i> Responder
-                    </button>
-                    <button type="button" class="btn btn-outline-secondary"
-                            data-bs-toggle="modal" data-bs-target="#statusModal">
-                        <i class="bi bi-gear me-1"></i> Alterar Situação
-                    </button>
-                </div>
+                    <!-- Botões de ação - apenas Técnico/Admin -->
+                    <div class="d-flex flex-column flex-sm-row gap-2">
+                        <button type="button" class="btn btn-primary">
+                            <i class="bi bi-reply me-1"></i> Responder
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary"
+                                data-bs-toggle="modal" data-bs-target="#statusModal">
+                            <i class="bi bi-gear me-1"></i> Alterar Situação
+                        </button>
+                    </div>
+                }
+                else
+                {
+                    <!-- Mensagem informativa para usuários comuns -->
+                    <div class="alert alert-info d-flex align-items-center">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <div>
+                            <strong>Status do chamado:</strong> @t.Status<br>
+                            <small class="text-muted">Nossa equipe técnica analisará seu chamado e entrará em contato quando necessário.</small>
+                        </div>
+                    </div>
+                }
             </div>
         </div>
     }
 </div>
 
-<!-- Modal Bootstrap nativo -->
-<div class="modal fade" id="statusModal" tabindex="-1" aria-labelledby="statusModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-sm">
-        <div class="modal-content">
-            <div class="modal-header bg-light">
-                <h6 class="modal-title fw-semibold" id="statusModalLabel">Alterar Status</h6>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
-            </div>
-            <form method="post" asp-page-handler="UpdateStatus" asp-route-id="@Model.Ticket?.Id">
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label asp-for="Input.NovoStatus" class="form-label">Novo Status:</label>
-                        <select asp-for="Input.NovoStatus" class="form-select">
-                            <option value="@TicketStatus.Aberto">Aberto</option>
-                            <option value="@TicketStatus.Andamento">Em Andamento</option>
-                            <option value="@TicketStatus.Resolvido">Resolvido</option>
-                            <option value="@TicketStatus.Fechado">Fechado</option>
-                        </select>
+<!-- Modal Bootstrap nativo - apenas para Técnico/Admin -->
+@if (User.IsInRole("Tecnico") || User.IsInRole("Admin"))
+{
+    <div class="modal fade" id="statusModal" tabindex="-1" aria-labelledby="statusModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content">
+                <div class="modal-header bg-light">
+                    <h6 class="modal-title fw-semibold" id="statusModalLabel">Alterar Status</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <form method="post" asp-page-handler="UpdateStatus" asp-route-id="@Model.Ticket?.Id">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label asp-for="Input.NovoStatus" class="form-label">Novo Status:</label>
+                            <select asp-for="Input.NovoStatus" class="form-select">
+                                <option value="@TicketStatus.Aberto">Aberto</option>
+                                <option value="@TicketStatus.Andamento">Em Andamento</option>
+                                <option value="@TicketStatus.Resolvido">Resolvido</option>
+                                <option value="@TicketStatus.Fechado">Fechado</option>
+                            </select>
+                        </div>
                     </div>
-                </div>
-                <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary btn-sm">Confirmar</button>
-                </div>
-            </form>
+                    <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary btn-sm">Confirmar</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-</div>
+}

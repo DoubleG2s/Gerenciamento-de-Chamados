@@ -900,3 +900,290 @@ body {
     color: var(--green, #16a34a);
 }
 
+/* Custom Accordion Styles */
+/* Custom Accordion Styles */
+.custom-accordion-button {
+    background-color: transparent !important;
+    color: #374151 !important;
+    border: none !important;
+    box-shadow: none !important;
+    text-decoration: none;
+    transition: background-color 0.15s ease;
+}
+
+    .custom-accordion-button:hover {
+        text-decoration: underline;
+        color: #374151 !important;
+        background-color: rgba(0, 0, 0, 0.03) !important;
+    }
+
+    .custom-accordion-button:focus {
+        text-decoration: underline;
+        color: #374151 !important;
+        background-color: transparent !important;
+        box-shadow: none !important;
+        border: none !important;
+    }
+
+    .custom-accordion-button:not(.collapsed) {
+        text-decoration: underline;
+        color: #374151 !important;
+        background-color: transparent !important;
+        box-shadow: none !important;
+    }
+
+    .custom-accordion-button.collapsed:hover {
+        text-decoration: underline;
+        color: #374151 !important;
+        background-color: rgba(0, 0, 0, 0.03) !important;
+    }
+
+    .custom-accordion-button::after {
+        color: #6b7280;
+    }
+
+
+.accordion-button.custom-accordion-button {
+    background-color: transparent !important;
+}
+
+    .accordion-button.custom-accordion-button:hover {
+        background-color: rgba(0, 0, 0, 0.03) !important;
+    }
+
+/* ============== TOPBAR USER INFO (NOVO) ============== */
+.topbar2 {
+    grid-area: topbar;
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 24px; /* Aumentado de 18px para 24px */
+    position: relative;
+    z-index: auto;
+}
+
+.top-left {
+    flex: 1;
+}
+
+.top-right {
+    display: flex;
+    align-items: center;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--text);
+}
+
+    .user-info strong {
+        font-weight: 600;
+    }
+
+    .user-info .badge {
+        font-size: 0.75rem;
+        padding: 0.35em 0.65em;
+        font-weight: 500;
+    }
+
+/* Badge colors matching user roles */
+.badge.bg-danger {
+    background-color: #dc3545 !important;
+}
+
+.badge.bg-warning {
+    background-color: #ffc107 !important;
+}
+
+.badge.bg-primary {
+    background-color: var(--primary) !important;
+}
+
+/* ============== SIDEBAR IMPROVEMENTS (NOVO) ============== */
+.side-group {
+    margin-bottom: 24px; /* Espaçamento melhor entre grupos */
+}
+
+    .side-group:last-child {
+        margin-bottom: 0;
+    }
+
+.side-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px; /* Padding um pouco maior */
+    border-radius: 12px; /* Border radius mais arredondado */
+    color: var(--text);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    margin-bottom: 2px;
+}
+
+    .side-link:hover {
+        background: #f8fafc;
+        color: var(--text);
+        text-decoration: none;
+    }
+
+    .side-link.active {
+        background: var(--primary-100);
+        border: 1px solid #c7d2fe;
+        color: var(--blue);
+        font-weight: 500;
+    }
+
+    /* Ícones do sidebar */
+    .side-link .i {
+        width: 20px;
+        text-align: center;
+        font-size: 16px;
+        opacity: 0.8;
+    }
+
+    .side-link.active .i {
+        opacity: 1;
+    }
+
+/* ============== RESPONSIVE DESIGN (MELHORADO) ============== */
+@media (max-width: 1024px) {
+    .app {
+        grid-template-columns: 220px 1fr; /* Sidebar um pouco menor */
+    }
+}
+
+@media (max-width: 768px) {
+    .app {
+        grid-template-columns: 200px 1fr;
+        grid-template-rows: 50px 1fr;
+    }
+
+    .sidebar {
+        padding: 12px;
+    }
+
+    .topbar2 {
+        padding: 0 16px;
+    }
+
+    .content {
+        padding: 16px 20px;
+    }
+
+    .user-info {
+        font-size: 12px;
+        gap: 6px;
+    }
+
+        .user-info strong {
+            max-width: 100px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .user-info .badge {
+            font-size: 0.7rem;
+            padding: 0.25em 0.5em;
+        }
+}
+
+@media (max-width: 640px) {
+    .app {
+        grid-template-columns: 180px 1fr;
+    }
+
+    .side-header span {
+        font-size: 14px;
+    }
+
+    .side-link {
+        padding: 8px 10px;
+        font-size: 14px;
+    }
+
+    .user-info strong {
+        display: none; /* Esconder nome em telas muito pequenas */
+    }
+}
+
+/* ============== SIDEBAR SCROLL (NOVO) ============== */
+.sidebar {
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+}
+
+    .sidebar::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    .sidebar::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .sidebar::-webkit-scrollbar-thumb {
+        background: var(--border);
+        border-radius: 2px;
+    }
+
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: var(--muted);
+        }
+
+/* ============== BRAND LOGO AREA (MELHORADO) ============== */
+.side-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    margin: 6px 4px 20px; /* Mais espaço embaixo */
+    padding-bottom: 16px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+    .side-header svg {
+        flex-shrink: 0;
+    }
+
+/* ============== USER INFO HOVER EFFECTS (NOVO) ============== */
+.user-info {
+    padding: 8px 12px;
+    border-radius: 8px;
+    transition: background-color 0.2s ease;
+}
+
+    .user-info:hover {
+        background-color: #f8fafc;
+    }
+
+/* ============== ACCESSIBILITY IMPROVEMENTS (NOVO) ============== */
+.side-link:focus {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+.user-info:focus-within {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+    border-radius: 8px;
+}
+
+/* ============== DARK MODE READY (PREPARAÇÃO FUTURA) ============== */
+@media (prefers-color-scheme: dark) {
+    /* Comentado para não afetar o tema atual */
+    /*
+    :root {
+        --bg: #0f172a;
+        --panel: #1e293b;
+        --border: #334155;
+        --text: #f1f5f9;
+        --muted: #94a3b8;
+    }
+    */
+}

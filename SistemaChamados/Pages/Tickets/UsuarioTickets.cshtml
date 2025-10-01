@@ -1,0 +1,190 @@
+﻿@page
+@model SistemaChamados.Pages.Tickets.UsuarioTicketsModel
+@using SistemaChamados.Models
+@using static SistemaChamados.Models.Enums
+@{
+    ViewData["Title"] = "Meus Chamados";
+}
+
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="page-header mb-4">
+        <h1>Meus Chamados</h1>
+        <p class="muted">Visualize e gerencie seus chamados de suporte</p>
+    </div>
+
+    <!-- Mensagens -->
+    @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i>
+            @Model.SuccessMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            @Model.ErrorMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (Model.MeusTickets.Any())
+    {
+        <!-- Botão para novo chamado -->
+        <div class="mb-4">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#criarTicketModal">
+                <i class="bi bi-plus-circle me-2"></i>Abrir Novo Chamado
+            </button>
+        </div>
+
+        <!-- Grid de Tickets -->
+        <div class="grid">
+            @foreach (var ticket in Model.MeusTickets)
+            {
+                <a class="card ticket" asp-page="/Tickets/Detalhes" asp-route-id="@ticket.Id">
+                    <div class="ticket-title">@ticket.Titulo</div>
+                    <div class="badges">
+                        <span class="badge status-@ticket.Status.ToString().ToLower()">@ticket.Status</span>
+                        <span class="badge pri-@(ticket.Prioridade switch {
+                            PriorityLevel.Baixa => "baixa",
+                            PriorityLevel.Média => "media",
+                            PriorityLevel.Alta => "alta",
+                            PriorityLevel.Crítica => "critica",
+                            _ => "media"
+                        })">@ticket.Prioridade</span>
+                    </div>
+                    <div class="meta">
+                        @if (ticket.Categoria != null)
+                        {
+                            <span class="category">@ticket.Categoria.Nome</span>
+                            <span>•</span>
+                        }
+                        <span>@ticket.CriadoEm.ToLocalTime().ToString("dd/MM/yyyy")</span>
+                        @if (ticket.Responsavel != null)
+                        {
+                            <span>•</span>
+                            <span>@ticket.Responsavel.Nome</span>
+                        }
+                    </div>
+                </a>
+            }
+        </div>
+    }
+    else
+    {
+        <!-- Estado vazio -->
+        <div class="text-center py-5">
+            <div class="mb-4" style="font-size: 4rem; opacity: 0.3;">📋</div>
+            <h3 class="text-muted mb-3">Nenhum chamado para ser exibido</h3>
+            <p class="text-muted mb-4">Você ainda não abriu nenhum chamado. Deseja abrir um chamado?</p>
+            <button type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#criarTicketModal">
+                <i class="bi bi-plus-circle me-2"></i>Abrir Novo Chamado
+            </button>
+        </div>
+    }
+</div>
+
+<!-- Modal Criar Ticket -->
+<div class="modal fade" id="criarTicketModal" tabindex="-1" aria-labelledby="criarTicketModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="criarTicketModalLabel">
+                    <i class="bi bi-plus-circle me-2"></i>Criar Novo Chamado
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <form method="post" asp-page-handler="CriarTicket" novalidate>
+                @Html.AntiForgeryToken()
+                
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <!-- Título -->
+                        <div class="col-12">
+                            <label asp-for="Input.Titulo" class="form-label">Título do Chamado *</label>
+                            <input asp-for="Input.Titulo" 
+                                   class="form-control" 
+                                   placeholder="Descreva brevemente o problema..." 
+                                   maxlength="120" />
+                            <span asp-validation-for="Input.Titulo" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Categoria e Prioridade -->
+                        <div class="col-md-6">
+                            <label asp-for="Input.CategoriaId" class="form-label">Categoria *</label>
+                            <select asp-for="Input.CategoriaId" class="form-select">
+                                <option value="">Selecione uma categoria</option>
+                                @foreach (var categoria in Model.Categorias)
+                                {
+                                    <option value="@categoria.Id">@categoria.Nome</option>
+                                }
+                            </select>
+                            <span asp-validation-for="Input.CategoriaId" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="Input.Prioridade" class="form-label">Prioridade</label>
+                            <select asp-for="Input.Prioridade" class="form-select">
+                                <option value="@PriorityLevel.Baixa">Baixa</option>
+                                <option value="@PriorityLevel.Média" selected>Média</option>
+                                <option value="@PriorityLevel.Alta">Alta</option>
+                                <option value="@PriorityLevel.Crítica">Crítica</option>
+                            </select>
+                        </div>
+
+                        <!-- Descrição -->
+                        <div class="col-12">
+                            <label asp-for="Input.Descricao" class="form-label">Descrição *</label>
+                            <textarea asp-for="Input.Descricao" 
+                                      rows="5" 
+                                      class="form-control"
+                                      placeholder="Descreva detalhadamente o problema, incluindo passos para reproduzir, mensagens de erro, etc..."
+                                      maxlength="2000"></textarea>
+                            <span asp-validation-for="Input.Descricao" class="text-danger small"></span>
+                            <small class="text-muted">Máximo 2000 caracteres</small>
+                        </div>
+
+                        <!-- Info -->
+                        <div class="col-12">
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle me-2"></i>
+                                <strong>Dica:</strong> Seja o mais específico possível na descrição. 
+                                Isso ajudará nossa equipe a resolver seu chamado mais rapidamente.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-plus-circle me-1"></i>Criar Chamado
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    
+    <script>
+        // Limpar formulário quando modal fechar
+        document.getElementById('criarTicketModal').addEventListener('hidden.bs.modal', function () {
+            // Limpar campos
+            document.querySelector('input[name="Input.Titulo"]').value = '';
+            document.querySelector('textarea[name="Input.Descricao"]').value = '';
+            document.querySelector('select[name="Input.CategoriaId"]').selectedIndex = 0;
+            document.querySelector('select[name="Input.Prioridade"]').selectedIndex = 1; // Média
+            
+            // Limpar mensagens de erro
+            document.querySelectorAll('.text-danger').forEach(span => span.textContent = '');
+        });
+    </script>
+}
