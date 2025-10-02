@@ -99,7 +99,7 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
 
-            <form method="post" asp-page-handler="CriarTicket" novalidate>
+            <form method="post" asp-page-handler="CriarTicket" enctype="multipart/form-data" novalidate>
                 @Html.AntiForgeryToken()
                 
                 <div class="modal-body">
@@ -149,12 +149,28 @@
                             <small class="text-muted">Máximo 2000 caracteres</small>
                         </div>
 
+                        <!-- Anexos -->
+                        <div class="col-12">
+                            <label class="form-label">Anexos</label>
+                            <div class="mb-2">
+                                <input type="file" 
+                                       class="form-control" 
+                                       id="anexosInput"
+                                       asp-for="Input.Anexos"
+                                       multiple 
+                                       accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.gif,.zip,.rar" />
+                                <small class="text-muted">
+                                    Tipos permitidos: PDF, DOC, TXT, Imagens, ZIP, RAR (máx. 10MB cada, máx. 5 arquivos)
+                                </small>
+                            </div>
+                            <div id="anexosPreview" class="mt-2"></div>
+                        </div>
+
                         <!-- Info -->
                         <div class="col-12">
                             <div class="alert alert-info">
                                 <i class="bi bi-info-circle me-2"></i>
-                                <strong>Dica:</strong> Seja o mais específico possível na descrição. 
-                                Isso ajudará nossa equipe a resolver seu chamado mais rapidamente.
+                                <strong>Dica:</strong> Seja o mais específico possível na descrição e anexe prints ou documentos que ajudem a entender o problema.
                             </div>
                         </div>
                     </div>
@@ -175,6 +191,51 @@
     <partial name="_ValidationScriptsPartial" />
     
     <script>
+        // Preview de anexos
+        document.getElementById('anexosInput').addEventListener('change', function(e) {
+            const preview = document.getElementById('anexosPreview');
+            preview.innerHTML = '';
+            
+            const files = e.target.files;
+            if (files.length === 0) return;
+            
+            const maxSize = 10 * 1024 * 1024; // 10MB
+            const allowedTypes = ['.pdf', '.doc', '.docx', '.txt', '.jpg', '.jpeg', '.png', '.gif', '.zip', '.rar'];
+            
+            Array.from(files).forEach((file, index) => {
+                const fileSize = (file.size / 1024 / 1024).toFixed(2);
+                const fileExt = '.' + file.name.split('.').pop().toLowerCase();
+                
+                let statusClass = 'text-success';
+                let statusIcon = 'bi-check-circle';
+                let statusText = `${fileSize} MB`;
+                
+                if (file.size > maxSize) {
+                    statusClass = 'text-danger';
+                    statusIcon = 'bi-x-circle';
+                    statusText = `${fileSize} MB - Muito grande`;
+                } else if (!allowedTypes.includes(fileExt)) {
+                    statusClass = 'text-danger';
+                    statusIcon = 'bi-x-circle';
+                    statusText = `Tipo não permitido`;
+                }
+                
+                const fileItem = document.createElement('div');
+                fileItem.className = 'd-flex align-items-center justify-content-between p-2 border rounded mb-2 bg-light';
+                fileItem.innerHTML = `
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-paperclip me-2"></i>
+                        <span class="fw-medium">${file.name}</span>
+                    </div>
+                    <div class="${statusClass}">
+                        <i class="bi ${statusIcon} me-1"></i>
+                        <small>${statusText}</small>
+                    </div>
+                `;
+                preview.appendChild(fileItem);
+            });
+        });
+
         // Limpar formulário quando modal fechar
         document.getElementById('criarTicketModal').addEventListener('hidden.bs.modal', function () {
             // Limpar campos
@@ -182,6 +243,8 @@
             document.querySelector('textarea[name="Input.Descricao"]').value = '';
             document.querySelector('select[name="Input.CategoriaId"]').selectedIndex = 0;
             document.querySelector('select[name="Input.Prioridade"]').selectedIndex = 1; // Média
+            document.getElementById('anexosInput').value = '';
+            document.getElementById('anexosPreview').innerHTML = '';
             
             // Limpar mensagens de erro
             document.querySelectorAll('.text-danger').forEach(span => span.textContent = '');

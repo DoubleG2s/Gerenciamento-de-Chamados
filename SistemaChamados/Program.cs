@@ -16,7 +16,7 @@ builder.Services
     .AddCookie(opt =>
     {
         opt.LoginPath = "/Autentication/Login";
-        opt.LogoutPath = "/Autentication/Logout";
+        opt.LogoutPath = "/Autentication/Login";
         opt.AccessDeniedPath = "/Autentication/Login";
         opt.SlidingExpiration = true;
         opt.ExpireTimeSpan = TimeSpan.FromHours(8);
@@ -58,6 +58,6 @@ app.MapGet("/ping-db", async (AppDbContext db) =>
 });
 
 // sua rota inicial -> página de Login
-app.MapGet("/", () => Results.Redirect("/Autentication/Login"));
+app.MapGet("/", () => Results.Redirect("/Login"));
 
 app.Run();

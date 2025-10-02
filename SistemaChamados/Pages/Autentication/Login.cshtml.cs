@@ -44,11 +44,11 @@ namespace SistemaChamados.Pages.Autentication
 
             try
             {
-                // Busca usuário ativo pelo e-mail (case-insensitive)
+                // Busca usuário ativo pelo e-mail (case-sensitive)
                 var user = await _db.Usuarios
                     .AsNoTracking()
                     .FirstOrDefaultAsync(u =>
-                        u.Email.ToLower() == Input.Email.ToLower() &&
+                        u.Email == Input.Email &&
                         u.Ativo);
 
                 if (user == null)

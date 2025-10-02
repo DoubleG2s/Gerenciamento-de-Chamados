@@ -10,16 +10,18 @@ using System.Security.Claims;
 
 namespace SistemaChamados.Pages.Tickets
 {
-    [Authorize(Roles = "Usuario")]
+    [Authorize(Roles = "Usuario, Tecnico, Admin")]
     public class UsuarioTicketsModel : PageModel
     {
         private readonly AppDbContext _context;
         private readonly ILogger<UsuarioTicketsModel> _logger;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public UsuarioTicketsModel(AppDbContext context, ILogger<UsuarioTicketsModel> logger)
+        public UsuarioTicketsModel(AppDbContext context, ILogger<UsuarioTicketsModel> logger, IWebHostEnvironment webHostEnvironment)
         {
             _context = context;
             _logger = logger;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         [BindProperty]
@@ -48,7 +50,7 @@ namespace SistemaChamados.Pages.Tickets
 
         public async Task<IActionResult> OnPostCriarTicketAsync()
         {
-            _logger.LogInformation("=== TENTATIVA DE CRIAR TICKET ===");
+            _logger.LogInformation("=== TENTATIVA DE CRIAR TICKET COM ANEXOS ===");
             _logger.LogInformation("Usuário: {UserId}, Título: {Titulo}", GetCurrentUserId(), Input.Titulo);
 
             if (!ModelState.IsValid)
@@ -68,6 +70,19 @@ namespace SistemaChamados.Pages.Tickets
                     return Page();
                 }
 
+                // Validar anexos
+                if (Input.Anexos != null && Input.Anexos.Count > 0)
+                {
+                    var validationResult = ValidarAnexos(Input.Anexos);
+                    if (!string.IsNullOrEmpty(validationResult))
+                    {
+                        ErrorMessage = validationResult;
+                        await CarregarDadosAsync();
+                        return Page();
+                    }
+                }
+
+                // Criar ticket
                 var novoTicket = new Ticket
                 {
                     Titulo = Input.Titulo.Trim(),
@@ -84,10 +99,20 @@ namespace SistemaChamados.Pages.Tickets
                 _context.Tickets.Add(novoTicket);
                 await _context.SaveChangesAsync();
 
-                _logger.LogInformation("✅ Ticket criado com sucesso: ID {TicketId}, Título: {Titulo}",
-                    novoTicket.Id, novoTicket.Titulo);
+                _logger.LogInformation("✅ Ticket criado com sucesso: ID {TicketId}", novoTicket.Id);
 
-                TempData["SuccessMessage"] = $"Chamado '{Input.Titulo}' foi criado com sucesso!";
+                // Processar anexos se existirem
+                var anexosSalvos = 0;
+                if (Input.Anexos != null && Input.Anexos.Count > 0)
+                {
+                    anexosSalvos = await ProcessarAnexosAsync(Input.Anexos, novoTicket.Id, usuarioId);
+                }
+
+                var mensagem = anexosSalvos > 0
+                    ? $"Chamado '{Input.Titulo}' criado com sucesso! {anexosSalvos} arquivo(s) anexado(s)."
+                    : $"Chamado '{Input.Titulo}' criado com sucesso!";
+
+                TempData["SuccessMessage"] = mensagem;
 
                 return RedirectToPage("UsuarioTickets");
             }
@@ -98,6 +123,94 @@ namespace SistemaChamados.Pages.Tickets
                 await CarregarDadosAsync();
                 return Page();
             }
+        }
+
+        private async Task<int> ProcessarAnexosAsync(List<IFormFile> anexos, int ticketId, int usuarioId)
+        {
+            try
+            {
+                // Criar diretório de uploads se não existir
+                var uploadsPath = Path.Combine(_webHostEnvironment.WebRootPath, "uploads", "tickets", ticketId.ToString());
+                if (!Directory.Exists(uploadsPath))
+                {
+                    Directory.CreateDirectory(uploadsPath);
+                    _logger.LogInformation("Diretório criado: {Path}", uploadsPath);
+                }
+
+                var anexosSalvos = 0;
+
+                foreach (var arquivo in anexos)
+                {
+                    if (arquivo.Length > 0)
+                    {
+                        // Gerar nome único para o arquivo
+                        var extensao = Path.GetExtension(arquivo.FileName).ToLowerInvariant();
+                        var nomeUnico = $"{Guid.NewGuid()}{extensao}";
+                        var caminhoCompleto = Path.Combine(uploadsPath, nomeUnico);
+
+                        // Salvar arquivo fisicamente
+                        using (var stream = new FileStream(caminhoCompleto, FileMode.Create))
+                        {
+                            await arquivo.CopyToAsync(stream);
+                        }
+
+                        // Salvar informações no banco
+                        var anexo = new Anexo
+                        {
+                            TicketId = ticketId,
+                            NomeArquivo = nomeUnico,
+                            NomeOriginal = arquivo.FileName,
+                            TamanhoBytes = arquivo.Length,
+                            TipoConteudo = arquivo.ContentType,
+                            CaminhoArquivo = $"/uploads/tickets/{ticketId}/{nomeUnico}",
+                            CriadoEm = DateTime.UtcNow,
+                            CriadoPor = usuarioId
+                        };
+
+                        _context.Anexos.Add(anexo);
+                        anexosSalvos++;
+
+                        _logger.LogInformation("Anexo salvo: {NomeOriginal} -> {NomeUnico}", arquivo.FileName, nomeUnico);
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+                return anexosSalvos;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao processar anexos");
+                return 0;
+            }
+        }
+
+        private string ValidarAnexos(List<IFormFile> anexos)
+        {
+            const long maxTamanhoBytes = 10 * 1024 * 1024; // 10MB
+            const int maxArquivos = 5;
+
+            var extensoesPermitidas = new[] { ".pdf", ".doc", ".docx", ".txt", ".jpg", ".jpeg", ".png", ".gif", ".zip", ".rar" };
+
+            if (anexos.Count > maxArquivos)
+            {
+                return $"Máximo {maxArquivos} arquivos permitidos.";
+            }
+
+            foreach (var arquivo in anexos)
+            {
+                if (arquivo.Length > maxTamanhoBytes)
+                {
+                    return $"Arquivo '{arquivo.FileName}' excede o tamanho máximo de 10MB.";
+                }
+
+                var extensao = Path.GetExtension(arquivo.FileName).ToLowerInvariant();
+                if (!extensoesPermitidas.Contains(extensao))
+                {
+                    return $"Tipo de arquivo '{extensao}' não permitido. Tipos permitidos: {string.Join(", ", extensoesPermitidas)}";
+                }
+            }
+
+            return string.Empty; // Todos válidos
         }
 
         private async Task CarregarDadosAsync()
@@ -144,6 +257,9 @@ namespace SistemaChamados.Pages.Tickets
 
             [Display(Name = "Prioridade")]
             public PriorityLevel Prioridade { get; set; } = PriorityLevel.Média;
+
+            [Display(Name = "Anexos")]
+            public List<IFormFile>? Anexos { get; set; } = new List<IFormFile>();
         }
     }
 }
