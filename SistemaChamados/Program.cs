@@ -20,6 +20,8 @@ builder.Services
         opt.AccessDeniedPath = "/Autentication/AccessDenied";
         opt.SlidingExpiration = true;
         opt.ExpireTimeSpan = TimeSpan.FromHours(8);
+        opt.Cookie.HttpOnly = true;  // ADICIONAR (segurança)
+        opt.Cookie.IsEssential = true;  // ADICIONAR (segurança)
     });
 
 builder.Services.AddAuthorization();
