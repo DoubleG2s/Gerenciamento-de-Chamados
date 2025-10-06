@@ -15,9 +15,9 @@ builder.Services
     .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(opt =>
     {
-        opt.LoginPath = "/Autentication/Login";
-        opt.LogoutPath = "/Autentication/Login";
-        opt.AccessDeniedPath = "/Autentication/AccessDenied";
+        opt.LoginPath = "/Login";
+        opt.LogoutPath = "/Logout";
+        opt.AccessDeniedPath = "/AccessDenied";
         opt.SlidingExpiration = true;
         opt.ExpireTimeSpan = TimeSpan.FromHours(8);
         opt.Cookie.HttpOnly = true;  // ADICIONAR (segurança)
@@ -48,6 +48,14 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthentication(); // <- importante ser antes do UseAuthorization
+//Middleware para prevenir cache de páginas autenticadas
+app.Use(async (context, next) =>
+{
+    context.Response.Headers["Cache-Control"] = "no-cache, no-store, must-revalidate";
+    context.Response.Headers["Pragma"] = "no-cache";
+    context.Response.Headers["Expires"] = "0";
+    await next();
+});
 app.UseAuthorization(); // <- importante ser depois do UseAuthentication
 
 app.MapRazorPages();

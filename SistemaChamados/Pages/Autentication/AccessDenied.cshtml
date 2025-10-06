@@ -1,4 +1,4 @@
-﻿@page
+﻿@page "/AccessDenied"
 @model SistemaChamados.Pages.Autentication.AccessDeniedModel
 @{
     ViewData["Title"] = "Acesso Negado";
@@ -12,7 +12,7 @@
             <p class="lead text-muted mb-4">
                 Você não tem permissão para acessar esta página.
             </p>
-            <a asp-page="/Index" class="btn btn-primary">
+            <a asp-page="/Tickets/UsuarioTickets" class="btn btn-primary">
                 <i class="bi bi-arrow-left me-2"></i>Voltar para o início
             </a>
         </div>
