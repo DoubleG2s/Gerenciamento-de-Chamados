@@ -17,7 +17,7 @@ builder.Services
     {
         opt.LoginPath = "/Autentication/Login";
         opt.LogoutPath = "/Autentication/Login";
-        opt.AccessDeniedPath = "/Autentication/Login";
+        opt.AccessDeniedPath = "/Autentication/AccessDenied";
         opt.SlidingExpiration = true;
         opt.ExpireTimeSpan = TimeSpan.FromHours(8);
     });
