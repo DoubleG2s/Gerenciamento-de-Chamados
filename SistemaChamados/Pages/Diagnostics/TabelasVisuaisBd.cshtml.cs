@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using SistemaChamados.Data;
@@ -6,6 +7,8 @@ using System.Data;
 
 namespace SistemaChamados.Pages.Diagnostics
 {
+    //autorização
+    [Authorize(Roles = "Admin")]
     public class TabelasVisuaisBdModel : PageModel
     {
         private readonly AppDbContext _db;
