@@ -8,7 +8,7 @@ using static SistemaChamados.Models.Enums;
 
 namespace SistemaChamados.Pages.Tickets
 {
-    [Authorize(Roles = "Admin,Tecnico")] // APENAS ADMIN E TÉCNICO PODEM ACESSAR
+    [Authorize(Roles = "Admin,Tecnico")]
     public class IndexModel : PageModel
     {
         private readonly AppDbContext _context;
@@ -22,11 +22,16 @@ namespace SistemaChamados.Pages.Tickets
 
         public List<Ticket> Items { get; set; } = new();
 
-        [BindProperty(SupportsGet = true)]
+        // Propriedades para armazenar os filtros aplicados (usado na view)
         public PriorityLevel? FiltrarPrioridade { get; set; }
+        public TicketStatus? FiltrarStatus { get; set; }
+
+        // Parâmetros recebidos via query string (como strings)
+        [BindProperty(SupportsGet = true)]
+        public string Prioridade { get; set; }
 
         [BindProperty(SupportsGet = true)]
-        public TicketStatus? FiltrarStatus { get; set; }
+        public string Status { get; set; }
 
         public async Task<IActionResult> OnGetAsync()
         {
@@ -50,15 +55,26 @@ namespace SistemaChamados.Pages.Tickets
                     .Include(t => t.Categoria)
                     .AsQueryable();
 
-                // Aplicar filtros se especificados
-                if (FiltrarPrioridade.HasValue)
+                // Converter e aplicar filtro de prioridade
+                if (!string.IsNullOrEmpty(Prioridade))
                 {
-                    query = query.Where(t => t.Prioridade == FiltrarPrioridade.Value);
+                    if (Enum.TryParse<PriorityLevel>(Prioridade, true, out var prioridadeEnum))
+                    {
+                        query = query.Where(t => t.Prioridade == prioridadeEnum);
+                        FiltrarPrioridade = prioridadeEnum;
+                        _logger.LogInformation("Filtro de prioridade aplicado: {Prioridade}", prioridadeEnum);
+                    }
                 }
 
-                if (FiltrarStatus.HasValue)
+                // Converter e aplicar filtro de status
+                if (!string.IsNullOrEmpty(Status))
                 {
-                    query = query.Where(t => t.Status == FiltrarStatus.Value);
+                    if (Enum.TryParse<TicketStatus>(Status, true, out var statusEnum))
+                    {
+                        query = query.Where(t => t.Status == statusEnum);
+                        FiltrarStatus = statusEnum;
+                        _logger.LogInformation("Filtro de status aplicado: {Status}", statusEnum);
+                    }
                 }
 
                 // Buscar todos os tickets (Admin/Técnico podem ver todos)
@@ -66,7 +82,8 @@ namespace SistemaChamados.Pages.Tickets
                     .OrderByDescending(t => t.CriadoEm)
                     .ToListAsync();
 
-                _logger.LogInformation("Carregados {Count} tickets", Items.Count);
+                _logger.LogInformation("Carregados {Count} tickets com filtros - Prioridade: {Prioridade}, Status: {Status}",
+                    Items.Count, FiltrarPrioridade?.ToString() ?? "Todos", FiltrarStatus?.ToString() ?? "Todos");
 
                 return Page();
             }

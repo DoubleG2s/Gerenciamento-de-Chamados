@@ -28,7 +28,8 @@ namespace SistemaChamados.Pages
                     EmAndamento = g.Count(t => t.Status == Enums.TicketStatus.Andamento),
                     Resolvidos = g.Count(t => t.Status == Enums.TicketStatus.Resolvido),
                     Fechados = g.Count(t => t.Status == Enums.TicketStatus.Fechado),
-                    Total = g.Count()
+                    //contar todos os tickets, exceto os Fechados
+                    Total = g.Count(t => t.Status != Enums.TicketStatus.Fechado)
                 })
                 .FirstOrDefaultAsync();
 
