@@ -1187,3 +1187,69 @@ body {
     }
     */
 }
+
+/* ===== Comentários (card com header) ===== */
+.comment-card {
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden; /* header com cantos arredondados */
+    box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+
+.comment-header {
+    background: #f0f7ff; /* azul clarinho */
+    border-bottom: 1px solid #e5e7eb;
+    padding: .6rem .85rem;
+}
+
+.comment-card.comment-status .comment-header {
+    background: #e9f2ff; /* um pouco mais forte p/ mudança de status */
+    border-left: 3px solid var(--primary);
+}
+
+.comment-avatar {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    min-height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: .8rem;
+    color: #ffffff;
+    background: #6b7280; /* cinza padrão */
+    border: 1px solid #ffffff55;
+    box-shadow: 0 1px 0 rgba(0,0,0,.05) inset;
+}
+
+.comment-avatar-status {
+    background: #2563eb; /* destaque p/ status change */
+}
+
+/* bootstrap 5.3-ish tokens fallback (se não tiver, mantém a aparência) */
+.bg-primary-subtle {
+    background: #e7f0ff !important;
+}
+
+.text-primary-emphasis {
+    color: #19407d !important;
+}
+
+.border-primary-subtle {
+    border-color: #cfe2ff !important;
+}
+
+.bg-warning-subtle {
+    background: #fff3cd !important;
+}
+
+.text-warning-emphasis {
+    color: #664d03 !important;
+}
+
+.border-warning-subtle {
+    border-color: #ffe69c !important;
+}
+

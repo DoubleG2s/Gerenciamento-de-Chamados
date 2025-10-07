@@ -29,6 +29,22 @@
 }
 
 <div class="container-fluid px-3 px-md-4">
+    <!-- Mensagens de feedback -->
+    @if (TempData["Sucesso"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i>@TempData["Sucesso"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Erro"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-circle me-2"></i>@TempData["Erro"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
     <!-- Voltar - Redirecionamento condicional -->
     <div class="mb-3">
         <a asp-page="@voltarPage" class="btn btn-link p-0 text-decoration-none text-muted d-inline-flex align-items-center gap-2">
@@ -161,7 +177,7 @@
                     </div>
                 </div>
 
-                <!-- ANEXOS - NOVA SEÇÃO -->
+                <!-- ANEXOS -->
                 @if (Model.Anexos.Any())
                 {
                     <div class="border-top pt-4 mb-4">
@@ -194,34 +210,113 @@
                     </div>
                 }
 
-                <!-- Campo de resposta - apenas Técnico/Admin -->
-                @if (User.IsInRole("Tecnico") || User.IsInRole("Admin"))
-                {
-                    <div class="mb-4">
-                        <label for="respostaTextarea" class="form-label fw-bold">Adicionar Resposta:</label>
-                        <textarea id="respostaTextarea" class="form-control bg-light border-0" rows="4"
-                          placeholder="Digite sua resposta para o chamado..." style="resize:vertical"></textarea>
-                    </div>
+                <!-- SEÇÃO DE COMENTÁRIOS -->
+                <div class="border-top pt-4 mb-4">
+                    <h5 class="fw-bold mb-3">
+                        <i class="bi bi-chat-left-text me-2"></i>Respostas
+                    </h5>
 
-                    <!-- Botões de ação - apenas Técnico/Admin -->
-                    <div class="d-flex flex-column flex-sm-row gap-2">
-                        <button type="button" class="btn btn-primary">
-                            <i class="bi bi-reply me-1"></i> Responder
-                        </button>
-                        <button type="button" class="btn btn-outline-secondary"
-                                data-bs-toggle="modal" data-bs-target="#statusModal">
-                            <i class="bi bi-gear me-1"></i> Alterar Situação
-                        </button>
-                    </div>
+                    @if (Model.Comentarios.Any())
+                    {
+                        <div class="mb-4">
+                            @foreach (var comentario in Model.Comentarios)
+                            {
+                                var isStatusChange = comentario.Tipo == TipoComentario.MudancaStatus;
+                                var isInterno = !comentario.VisivelSolicitante && (User.IsInRole("Tecnico") || User.IsInRole("Admin"));
+
+                                <div class="card comment-card mb-3 @(isStatusChange ? "comment-status" : null)">
+                                    <!-- HEADER -->
+                                    <div class="comment-header d-flex justify-content-between align-items-center">
+                                        <div class="d-flex align-items-center">
+                                            <div class="comment-avatar me-2 @(isStatusChange ? "comment-avatar-status" : null)">
+                                                @comentario.Usuario?.Iniciais
+                                            </div>
+                                            <div class="d-flex flex-column">
+                                                <div class="d-flex align-items-center gap-2 flex-wrap">
+                                                    <strong>@comentario.Usuario?.Nome</strong>
+
+                                                    @if (isStatusChange)
+                                                    {
+                                                        <span class="badge rounded-pill bg-primary-subtle text-primary-emphasis border border-primary-subtle">
+                                                            Mudança de Status
+                                                        </span>
+                                                    }
+
+                                                    @if (isInterno)
+                                                    {
+                                                        <span class="badge rounded-pill bg-warning-subtle text-warning-emphasis border border-warning-subtle">
+                                                            Interno
+                                                        </span>
+                                                    }
+                                                </div>
+                                                <small class="text-muted">@comentario.CriadoEm.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</small>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- BODY -->
+                                    <div class="card-body">
+                                        <p class="mb-0" style="white-space: pre-wrap;">@comentario.Comentario</p>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+
+                <!-- FORMULÁRIO DE COMENTÁRIO -->
+                @if (t.Status != TicketStatus.Fechado)
+                {
+                    <form method="post" asp-page-handler="AdicionarComentario" asp-route-id="@t.Id">
+                        <div class="mb-3">
+                            <label asp-for="ComentarioInput.Comentario" class="form-label fw-bold">
+                                @if (User.IsInRole("Tecnico") || User.IsInRole("Admin"))
+                                {
+                                    <text>Adicionar Resposta:</text>
+                                }
+                                else
+                                {
+                                    <text>Adicionar Comentário:</text>
+                                }
+                            </label>
+                            <textarea asp-for="ComentarioInput.Comentario"
+                                      class="form-control bg-light border-0"
+                                      rows="4"
+                                      placeholder="Digite sua resposta..."
+                                      style="resize:vertical"></textarea>
+                            <span asp-validation-for="ComentarioInput.Comentario" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-flex flex-column flex-sm-row gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-reply me-1"></i>
+                                @if (User.IsInRole("Tecnico") || User.IsInRole("Admin"))
+                                {
+                                    <text>Responder</text>
+                                }
+                                else
+                                {
+                                    <text>Enviar Comentário</text>
+                                }
+                            </button>
+
+                            @if (User.IsInRole("Tecnico") || User.IsInRole("Admin"))
+                            {
+                                <button type="button" class="btn btn-outline-secondary"
+                                        data-bs-toggle="modal" data-bs-target="#statusModal">
+                                    <i class="bi bi-gear me-1"></i> Alterar Situação
+                                </button>
+                            }
+                        </div>
+                    </form>
                 }
                 else
                 {
-                    <!-- Mensagem informativa para usuários comuns -->
-                    <div class="alert alert-info d-flex align-items-center">
-                        <i class="bi bi-info-circle me-2"></i>
+                    <div class="alert alert-warning d-flex align-items-center">
+                        <i class="bi bi-lock me-2"></i>
                         <div>
-                            <strong>Status do chamado:</strong> @t.Status<br>
-                            <small class="text-muted">Nossa equipe técnica analisará seu chamado e entrará em contato quando necessário.</small>
+                            <strong>Ticket Fechado</strong><br>
+                            <small class="text-muted">Este chamado está fechado e não aceita mais comentários.</small>
                         </div>
                     </div>
                 }
@@ -230,7 +325,7 @@
     }
 </div>
 
-<!-- Modal Bootstrap nativo - apenas para Técnico/Admin -->
+<!-- Modal Bootstrap - apenas para Técnico/Admin -->
 @if (User.IsInRole("Tecnico") || User.IsInRole("Admin"))
 {
     <div class="modal fade" id="statusModal" tabindex="-1" aria-labelledby="statusModalLabel" aria-hidden="true">
@@ -260,4 +355,8 @@
             </div>
         </div>
     </div>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
 }

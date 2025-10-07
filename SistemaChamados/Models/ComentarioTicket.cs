@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using static SistemaChamados.Models.Enums;
 
 namespace SistemaChamados.Models
 {
@@ -41,10 +42,10 @@ namespace SistemaChamados.Models
     }
 
     // Enum para o tipo de comentário
-    public enum TipoComentario
-    {
-        Comentario = 1,        // Comentário normal do usuário
-        MudancaStatus = 2,     // Mudança de status do ticket  
-        Atribuicao = 3         // Atribuição de responsável
-    }
+    //public enum TipoComentario
+    //{
+    //    Comentario = 1,        // Comentário normal do usuário
+    //    MudancaStatus = 2,     // Mudança de status do ticket  
+    //    Atribuicao = 3         // Atribuição de responsável
+    //}
 }
