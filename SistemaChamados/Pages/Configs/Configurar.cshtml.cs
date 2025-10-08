@@ -40,14 +40,18 @@ namespace SistemaChamados.Pages.Configs
 
         public async Task OnGetAsync(string? tab = null)
         {
+            _logger.LogInformation("=== OnGetAsync chamado - tab: {Tab} ===", tab ?? "NULL");
+
             // Verificar se há mensagem de sucesso no TempData
             if (TempData["SuccessMessage"] != null)
             {
                 SuccessMessage = TempData["SuccessMessage"].ToString();
+                _logger.LogInformation("SuccessMessage: {Message}", SuccessMessage);
             }
             if (TempData["ErrorMessage"] != null)
             {
                 ErrorMessage = TempData["ErrorMessage"].ToString();
+                _logger.LogInformation("ErrorMessage: {Message}", ErrorMessage);
             }
 
             // Definir aba ativa
@@ -58,12 +62,16 @@ namespace SistemaChamados.Pages.Configs
                 _ => "pane-senha"
             };
 
+            _logger.LogInformation("ActiveTab definido como: {Tab}", ActiveTab);
+
             // Carregar usuários para a tabela (apenas Admin)
             if (User.IsInRole("Admin"))
             {
                 await CarregarUsuariosAsync();
+                _logger.LogInformation("Carregados {Count} usuários", Usuarios.Count);
             }
         }
+
 
         public async Task<IActionResult> OnPostAlterarSenhaAsync()
         {
@@ -255,99 +263,147 @@ namespace SistemaChamados.Pages.Configs
 
         public async Task<IActionResult> OnPostCriarUsuarioAsync()
         {
-            // VERIFICAÇÃO DE SEGURANÇA: Apenas Admin/Técnico podem criar usuários
+            // MANTER ABA ABERTA
+            ActiveTab = "pane-usuarios";
+
+            // VERIFICAÇÃO DE SEGURANÇA
             if (!User.IsInRole("Admin") && !User.IsInRole("Tecnico"))
             {
+                _logger.LogWarning("Tentativa de criar usuário por usuário não autorizado");
                 return Forbid();
             }
 
-            // Manter aba de usuários ativa
-            ActiveTab = "pane-usuarios";
-
             _logger.LogInformation("=== TENTATIVA DE CRIAR USUÁRIO ===");
             _logger.LogInformation("Nome: {Nome}, Sobrenome: {Sobrenome}, Email: {Email}",
-                CriarUsuario.Nome, CriarUsuario.Sobrenome, CriarUsuario.Email);
+                CriarUsuario?.Nome ?? "NULL", CriarUsuario?.Sobrenome ?? "NULL", CriarUsuario?.Email ?? "NULL");
 
-            // Limpar erros do formulário de senha
-            ModelState.Remove("AlterarSenha.SenhaAtual");
-            ModelState.Remove("AlterarSenha.NovaSenha");
-            ModelState.Remove("AlterarSenha.ConfirmarSenha");
+            // ===== CRÍTICO: REMOVER TODOS OS CAMPOS QUE NÃO SÃO DO CriarUsuario =====
+            var keysToRemove = ModelState.Keys
+                .Where(k => !k.StartsWith("CriarUsuario"))
+                .ToList();
 
+            _logger.LogInformation("Removendo {Count} chaves do ModelState que não pertencem a CriarUsuario", keysToRemove.Count);
+
+            foreach (var key in keysToRemove)
+            {
+                _logger.LogInformation("  Removendo: {Key}", key);
+                ModelState.Remove(key);
+            }
+
+            // Log para verificar campos restantes
+            _logger.LogInformation("Campos no ModelState após limpeza: {Keys}",
+                string.Join(", ", ModelState.Keys));
+
+            // VALIDAÇÃO DO MODELSTATE
             if (!ModelState.IsValid)
             {
-                ErrorMessage = "Por favor, corrija os erros no formulário.";
-                if (User.IsInRole("Admin"))
+                _logger.LogWarning("❌ ModelState inválido. Erros encontrados:");
+                foreach (var modelState in ModelState.Where(ms => ms.Value.Errors.Any()))
                 {
-                    await CarregarUsuariosAsync();
+                    foreach (var error in modelState.Value.Errors)
+                    {
+                        var errorMsg = error.ErrorMessage ?? error.Exception?.Message ?? "Erro desconhecido";
+                        _logger.LogWarning("  - Campo '{Campo}': {Erro}", modelState.Key, errorMsg);
+                    }
                 }
+
+                await CarregarUsuariosAsync();
                 return Page();
             }
 
             try
             {
-                // Validar telefone se fornecido
-                if (!string.IsNullOrWhiteSpace(CriarUsuario.Telefone) && !ValidarTelefone(CriarUsuario.Telefone))
+                // ===== VALIDAÇÃO 1: Telefone (se fornecido) =====
+                if (!string.IsNullOrWhiteSpace(CriarUsuario.Telefone))
                 {
-                    ErrorMessage = "Formato de telefone inválido. Use: (99) 99999-9999";
-                    if (User.IsInRole("Admin"))
+                    if (!ValidarTelefone(CriarUsuario.Telefone))
                     {
+                        _logger.LogWarning("Telefone inválido: {Telefone}", CriarUsuario.Telefone);
+                        ModelState.AddModelError("CriarUsuario.Telefone", "Formato de telefone inválido. Use: (99) 99999-9999");
                         await CarregarUsuariosAsync();
+                        return Page();
                     }
+                }
+
+                // ===== VALIDAÇÃO 1.5: Email válido e completo =====
+                if (!IsValidEmail(CriarUsuario.Email))
+                {
+                    _logger.LogWarning("Email inválido ou incompleto: {Email}", CriarUsuario.Email);
+                    ModelState.AddModelError("CriarUsuario.Email", "E-mail inválido. Utilize um formato válido (exemplo@dominio.com)");
+                    await CarregarUsuariosAsync();
                     return Page();
                 }
 
-                // ===== VALIDAÇÃO 1: Email já existe =====
+                // ===== VALIDAÇÃO 2: Email já existe =====
                 var emailExiste = await _context.Usuarios
                     .AnyAsync(u => u.Email.ToLower() == CriarUsuario.Email.ToLower());
 
                 if (emailExiste)
                 {
-                    ErrorMessage = "Já existe um usuário cadastrado com este e-mail.";
-                    if (User.IsInRole("Admin"))
-                    {
-                        await CarregarUsuariosAsync();
-                    }
+                    var errorMsg = "Já existe um usuário cadastrado com este e-mail";
+                    _logger.LogWarning("❌ {Erro}", errorMsg);
+                    ModelState.AddModelError("CriarUsuario.Email", errorMsg);
+
+                    // Log adicional para debug
+                    _logger.LogInformation("ModelState após adicionar erro de email - IsValid: {IsValid}, ErrorCount: {Count}",
+                        ModelState.IsValid,
+                        ModelState.Values.SelectMany(v => v.Errors).Count());
+
+                    await CarregarUsuariosAsync();
                     return Page();
                 }
 
-                // ===== VALIDAÇÃO 2: Nome e sobrenome não têm números =====
-                if (ContemNumeros(CriarUsuario.Nome) || ContemNumeros(CriarUsuario.Sobrenome))
+                // ===== VALIDAÇÃO EXTRA: Email válido e completo =====
+                if (!IsValidEmail(CriarUsuario.Email))
                 {
-                    ErrorMessage = "Nome e sobrenome não podem conter números.";
-                    if (User.IsInRole("Admin"))
-                    {
-                        await CarregarUsuariosAsync();
-                    }
+                    _logger.LogWarning("Email inválido ou incompleto: {Email}", CriarUsuario.Email);
+                    ModelState.AddModelError("CriarUsuario.Email", "E-mail inválido. Utilize um formato válido (exemplo@dominio.com)");
+                    await CarregarUsuariosAsync();
                     return Page();
                 }
 
-                // ===== VALIDAÇÃO 3: Nome e sobrenome únicos =====
+                // ===== VALIDAÇÃO 3: Nome e sobrenome não têm números =====
+                if (ContemNumeros(CriarUsuario.Nome))
+                {
+                    _logger.LogWarning("Nome contém números: {Nome}", CriarUsuario.Nome);
+                    ModelState.AddModelError("CriarUsuario.Nome", "O nome não pode conter números");
+                    await CarregarUsuariosAsync();
+                    return Page();
+                }
+
+                if (ContemNumeros(CriarUsuario.Sobrenome))
+                {
+                    _logger.LogWarning("Sobrenome contém números: {Sobrenome}", CriarUsuario.Sobrenome);
+                    ModelState.AddModelError("CriarUsuario.Sobrenome", "O sobrenome não pode conter números");
+                    await CarregarUsuariosAsync();
+                    return Page();
+                }
+
+                // ===== VALIDAÇÃO 4: Nome completo único =====
                 var nomeCompleto = $"{CriarUsuario.Nome.Trim()} {CriarUsuario.Sobrenome.Trim()}";
                 var nomeExiste = await _context.Usuarios
                     .AnyAsync(u => u.Nome.ToLower() == nomeCompleto.ToLower());
 
                 if (nomeExiste)
                 {
-                    ErrorMessage = "Já existe um usuário com este nome completo.";
-                    if (User.IsInRole("Admin"))
-                    {
-                        await CarregarUsuariosAsync();
-                    }
+                    _logger.LogWarning("Nome completo já existe: {Nome}", nomeCompleto);
+                    ModelState.AddModelError("CriarUsuario.Nome", "Já existe um usuário com este nome completo");
+                    await CarregarUsuariosAsync();
                     return Page();
                 }
 
-                // ===== VALIDAÇÃO 4: Senha forte =====
+                // ===== VALIDAÇÃO 5: Senha forte =====
                 if (!ValidarSenhaForte(CriarUsuario.Senha))
                 {
-                    ErrorMessage = "A senha deve ter no mínimo 8 caracteres e pelo menos um símbolo (!@@#$%^&*).";
-                    if (User.IsInRole("Admin"))
-                    {
-                        await CarregarUsuariosAsync();
-                    }
+                    _logger.LogWarning("Senha não atende aos requisitos de segurança");
+                    ModelState.AddModelError("CriarUsuario.Senha", "A senha deve ter no mínimo 8 caracteres e pelo menos um símbolo (!@#$%^&*)");
+                    await CarregarUsuariosAsync();
                     return Page();
                 }
 
                 // ===== CRIAR USUÁRIO =====
+                _logger.LogInformation("Todas as validações passaram. Criando novo usuário: {Nome}", nomeCompleto);
+
                 var novoUsuario = new Usuario
                 {
                     Nome = nomeCompleto,
@@ -375,14 +431,12 @@ namespace SistemaChamados.Pages.Configs
             catch (Exception ex)
             {
                 _logger.LogError(ex, "❌ Erro ao criar usuário");
-                ErrorMessage = "Erro interno ao criar usuário. Tente novamente.";
-                if (User.IsInRole("Admin"))
-                {
-                    await CarregarUsuariosAsync();
-                }
+                ModelState.AddModelError("CriarUsuario.Geral", "Erro interno ao criar usuário. Tente novamente.");
+                await CarregarUsuariosAsync();
                 return Page();
             }
         }
+
 
         public async Task<IActionResult> OnPostEditarUsuarioAsync()
         {
@@ -635,7 +689,7 @@ namespace SistemaChamados.Pages.Configs
             return string.IsNullOrWhiteSpace(telefone) ? null : telefone.Trim();
         }
 
-        // Método auxiliar para validar email
+        // Método auxiliar para validar email de forma rigorosa
         private bool IsValidEmail(string email)
         {
             if (string.IsNullOrWhiteSpace(email))
@@ -643,15 +697,69 @@ namespace SistemaChamados.Pages.Configs
 
             try
             {
+                // Validar formato básico com MailAddress
                 var addr = new System.Net.Mail.MailAddress(email);
-                return addr.Address == email;
+
+                if (addr.Address != email)
+                    return false;
+
+                // Verificações adicionais rigorosas
+                var parts = email.Split('@');
+
+                // Deve ter exatamente um @
+                if (parts.Length != 2)
+                    return false;
+
+                var localPart = parts[0];
+                var domainPart = parts[1];
+
+                // Validar parte local (antes do @)
+                if (string.IsNullOrWhiteSpace(localPart) || localPart.Length < 1)
+                    return false;
+
+                // Validar domínio
+                if (string.IsNullOrWhiteSpace(domainPart) || domainPart.Length < 3)
+                    return false;
+
+                // Domínio deve conter pelo menos um ponto
+                if (!domainPart.Contains("."))
+                    return false;
+
+                // Não pode terminar ou começar com ponto
+                if (domainPart.StartsWith(".") || domainPart.EndsWith("."))
+                    return false;
+
+                // Não pode ter pontos consecutivos
+                if (domainPart.Contains(".."))
+                    return false;
+
+                // Validar partes do domínio (ex: exemplo.com -> ["exemplo", "com"])
+                var domainParts = domainPart.Split('.');
+
+                // Deve ter pelo menos 2 partes (exemplo.com)
+                if (domainParts.Length < 2)
+                    return false;
+
+                // Todas as partes devem ter pelo menos 1 caractere
+                if (domainParts.Any(part => string.IsNullOrWhiteSpace(part) || part.Length < 1))
+                    return false;
+
+                // A última parte (TLD) deve ter pelo menos 2 caracteres
+                var tld = domainParts[domainParts.Length - 1];
+                if (tld.Length < 2)
+                    return false;
+
+                // TLD deve conter apenas letras
+                if (!tld.All(char.IsLetter))
+                    return false;
+
+                return true;
             }
             catch
             {
                 return false;
             }
         }
-
         // CLASSES DE INPUT
         public class AlterarSenhaInput
         {
@@ -672,39 +780,39 @@ namespace SistemaChamados.Pages.Configs
 
         public class CriarUsuarioInput
         {
-            [Required(ErrorMessage = "Nome é obrigatório")]
-            [StringLength(50, MinimumLength = 2, ErrorMessage = "Nome deve ter entre 2 e 50 caracteres")]
-            [RegularExpression(@"^[a-zA-ZÀ-ÿ\s]+$", ErrorMessage = "Nome deve conter apenas letras")]
+            [Required(ErrorMessage = "O nome é obrigatório")]
+            [StringLength(50, MinimumLength = 2, ErrorMessage = "O nome deve ter entre 2 e 50 caracteres")]
+            [RegularExpression(@"^[a-zA-ZÀ-ÿ\s]+$", ErrorMessage = "O nome deve conter apenas letras")]
             public string Nome { get; set; } = string.Empty;
 
-            [Required(ErrorMessage = "Sobrenome é obrigatório")]
-            [StringLength(50, MinimumLength = 2, ErrorMessage = "Sobrenome deve ter entre 2 e 50 caracteres")]
-            [RegularExpression(@"^[a-zA-ZÀ-ÿ\s]+$", ErrorMessage = "Sobrenome deve conter apenas letras")]
+            [Required(ErrorMessage = "O sobrenome é obrigatório")]
+            [StringLength(50, MinimumLength = 2, ErrorMessage = "O sobrenome deve ter entre 2 e 50 caracteres")]
+            [RegularExpression(@"^[a-zA-ZÀ-ÿ\s]+$", ErrorMessage = "O sobrenome deve conter apenas letras")]
             public string Sobrenome { get; set; } = string.Empty;
 
-            [Required(ErrorMessage = "E-mail é obrigatório")]
-            [EmailAddress(ErrorMessage = "E-mail inválido")]
-            [StringLength(150, ErrorMessage = "E-mail muito longo")]
+            [Required(ErrorMessage = "O e-mail é obrigatório")]
+            [EmailAddress(ErrorMessage = "O e-mail está em formato inválido")]
+            [StringLength(150, ErrorMessage = "O e-mail não pode ter mais de 150 caracteres")]
             public string Email { get; set; } = string.Empty;
 
-            [Required(ErrorMessage = "Senha é obrigatória")]
-            [StringLength(100, MinimumLength = 8, ErrorMessage = "Senha deve ter no mínimo 8 caracteres")]
+            [Required(ErrorMessage = "A senha é obrigatória")]
+            [StringLength(100, MinimumLength = 8, ErrorMessage = "A senha deve ter no mínimo 8 caracteres")]
+            // REMOVA O RegularExpression - validação será feita manualmente
             public string Senha { get; set; } = string.Empty;
 
-            [StringLength(20, ErrorMessage = "Telefone muito longo")]
-            [RegularExpression(@"^\(\d{2}\)\s\d{5}-\d{4}$", ErrorMessage = "Formato inválido. Use: (99) 99999-9999")]
+            [StringLength(20, ErrorMessage = "O telefone não pode ter mais de 20 caracteres")]
+            // REMOVA O RegularExpression do telefone também - validação manual
             public string? Telefone { get; set; }
 
-            [StringLength(50, ErrorMessage = "Departamento muito longo")]
+            [StringLength(50, ErrorMessage = "O departamento não pode ter mais de 50 caracteres")]
             public string? Departamento { get; set; }
 
-            [StringLength(50, ErrorMessage = "Cargo muito longo")]
+            [StringLength(50, ErrorMessage = "O cargo não pode ter mais de 50 caracteres")]
             public string? Cargo { get; set; }
 
-            [Required(ErrorMessage = "Tipo de usuário é obrigatório")]
+            [Required(ErrorMessage = "O tipo de usuário é obrigatório")]
             public string TipoUsuario { get; set; } = "Usuario";
         }
-
         public class EditarUsuarioInput
         {
             public int Id { get; set; }

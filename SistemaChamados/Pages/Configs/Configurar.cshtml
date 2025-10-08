@@ -1,6 +1,6 @@
 ﻿@page
 @model SistemaChamados.Pages.Configs.ConfigurarModel
-@using Microsoft.AspNetCore.Authorization
+
 @{
     ViewData["Title"] = "Configurações";
     bool isAdminOrTechnician = User.IsInRole("Admin") || User.IsInRole("Tecnico");
@@ -9,7 +9,6 @@
 }
 
 <div class="container-fluid config-page py-3">
-
     <!-- Título + subtítulo -->
     <div class="mb-3">
         <h1 class="fw-bold display-6 mb-1">Configurações</h1>
@@ -20,28 +19,50 @@
     <div class="bg-white border rounded-3 p-1 mb-3 shadow-sm">
         <ul class="nav nav-pills nav-fill gap-1 config-tabs" id="configTabs" role="tablist">
             <li class="nav-item" role="presentation">
-                <button class="nav-link @(Model.ActiveTab == "pane-senha" ? "active" : "")" id="tab-senha"
-                        data-bs-toggle="tab" data-bs-target="#pane-senha" type="button" role="tab"
-                        aria-controls="pane-senha" aria-selected="@(Model.ActiveTab == "pane-senha" ? "true" : "false")">
-                    <i class="bi bi-lock me-2"></i> <span>Senha</span>
+                <button
+                    class="nav-link @(Model.ActiveTab == "pane-senha" ? "active" : "")"
+                    id="tab-senha"
+                    data-bs-toggle="tab"
+                    data-bs-target="#pane-senha"
+                    type="button"
+                    role="tab"
+                    aria-controls="pane-senha"
+                    aria-selected="@(Model.ActiveTab == "pane-senha" ? "true" : "false")">
+                    <i class="bi bi-lock me-2"></i>
+                    <span>Senha</span>
                 </button>
             </li>
+
             <li class="nav-item" role="presentation">
-                <button class="nav-link @(Model.ActiveTab == "pane-tema" ? "active" : "")" id="tab-tema"
-                        data-bs-toggle="tab" data-bs-target="#pane-tema" type="button" role="tab"
-                        aria-controls="pane-tema" aria-selected="@(Model.ActiveTab == "pane-tema" ? "true" : "false")">
-                    <i class="bi bi-palette me-2"></i> <span>Tema</span>
+                <button
+                    class="nav-link @(Model.ActiveTab == "pane-tema" ? "active" : "")"
+                    id="tab-tema"
+                    data-bs-toggle="tab"
+                    data-bs-target="#pane-tema"
+                    type="button"
+                    role="tab"
+                    aria-controls="pane-tema"
+                    aria-selected="@(Model.ActiveTab == "pane-tema" ? "true" : "false")">
+                    <i class="bi bi-palette me-2"></i>
+                    <span>Tema</span>
                 </button>
             </li>
-            
+
             @* Aba Usuários - APENAS Admin/Técnico *@
             @if (isAdminOrTechnician)
             {
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link @(Model.ActiveTab == "pane-usuarios" ? "active" : "")" id="tab-usuarios"
-                            data-bs-toggle="tab" data-bs-target="#pane-usuarios" type="button" role="tab"
-                            aria-controls="pane-usuarios" aria-selected="@(Model.ActiveTab == "pane-usuarios" ? "true" : "false")">
-                        <i class="bi bi-people me-2"></i> <span>Usuários</span>
+                    <button
+                        class="nav-link @(Model.ActiveTab == "pane-usuarios" ? "active" : "")"
+                        id="tab-usuarios"
+                        data-bs-toggle="tab"
+                        data-bs-target="#pane-usuarios"
+                        type="button"
+                        role="tab"
+                        aria-controls="pane-usuarios"
+                        aria-selected="@(Model.ActiveTab == "pane-usuarios" ? "true" : "false")">
+                        <i class="bi bi-people me-2"></i>
+                        <span>Usuários</span>
                     </button>
                 </li>
             }
@@ -50,93 +71,113 @@
 
     <!-- Conteúdo das tabs -->
     <div class="tab-content">
+        <!-- PANE: SENHA - TODOS OS USUÁRIOS -->
+        <div
+            class="tab-pane fade @(Model.ActiveTab == "pane-senha" ? "show active" : "")"
+            id="pane-senha"
+            role="tabpanel"
+            aria-labelledby="tab-senha">
 
-       <!-- PANE: SENHA - TODOS OS USUÁRIOS -->
-<div class="tab-pane fade @(Model.ActiveTab == "pane-senha" ? "show active" : "")" id="pane-senha" role="tabpanel" aria-labelledby="tab-senha">
-    <div class="card shadow-sm border config-card">
-        <div class="card-body p-4">
-            <div class="d-flex align-items-center mb-2">
-                <i class="bi bi-key me-2 fs-5"></i>
-                <h5 class="card-title fw-bold mb-0">Alterar Senha</h5>
-            </div>
-            <p class="text-muted mb-4">Atualize sua senha para manter sua conta segura</p>
-
-            @* Mensagem de erro geral *@
-            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
-            {
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <i class="bi bi-exclamation-triangle me-2"></i>
-                    @Model.ErrorMessage
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            }
-
-            <form method="post" asp-page-handler="AlterarSenha" novalidate autocomplete="off">
-                @Html.AntiForgeryToken()
-                
-                <div class="mb-3">
-                    <label asp-for="AlterarSenha.SenhaAtual" class="form-label fw-600">Senha Atual *</label>
-                    <input asp-for="AlterarSenha.SenhaAtual" 
-                           type="password" 
-                           class="form-control form-control-lg rounded-3 config-control @(ViewData.ModelState["AlterarSenha.SenhaAtual"]?.Errors.Any() == true ? "is-invalid" : "")"
-                           placeholder="Digite sua senha atual"
-                           autocomplete="current-password" />
-                    <span asp-validation-for="AlterarSenha.SenhaAtual" class="text-danger small d-block mt-1"></span>
-                </div>
-
-                <div class="mb-3">
-                    <label asp-for="AlterarSenha.NovaSenha" class="form-label fw-600">Nova Senha *</label>
-                    <input asp-for="AlterarSenha.NovaSenha" 
-                           type="password" 
-                           class="form-control form-control-lg rounded-3 config-control @(ViewData.ModelState["AlterarSenha.NovaSenha"]?.Errors.Any() == true ? "is-invalid" : "")"
-                           placeholder="Digite sua nova senha"
-                           autocomplete="new-password" />
-                    <span asp-validation-for="AlterarSenha.NovaSenha" class="text-danger small d-block mt-1"></span>
-                    <small class="text-muted">Mínimo 8 caracteres com pelo menos um símbolo (@("!@#$%^&*"))</small>
-                </div>
-
-                <div class="mb-4">
-                    <label asp-for="AlterarSenha.ConfirmarSenha" class="form-label fw-600">Confirmar Nova Senha *</label>
-                    <input asp-for="AlterarSenha.ConfirmarSenha" 
-                           type="password" 
-                           class="form-control form-control-lg rounded-3 config-control @(ViewData.ModelState["AlterarSenha.ConfirmarSenha"]?.Errors.Any() == true ? "is-invalid" : "")"
-                           placeholder="Confirme sua nova senha"
-                           autocomplete="new-password" />
-                    <span asp-validation-for="AlterarSenha.ConfirmarSenha" class="text-danger small d-block mt-1"></span>
-                </div>
-
-                @* Resumo de validação *@
-                @if (!ViewData.ModelState.IsValid && ViewData.ModelState.Keys.Any(k => k.StartsWith("AlterarSenha")))
-                {
-                    <div class="alert alert-warning">
-                        <i class="bi bi-exclamation-circle me-2"></i>
-                        <strong>Corrija os erros acima antes de continuar:</strong>
-                        <ul class="mb-0 mt-2">
-                            @foreach (var key in ViewData.ModelState.Keys.Where(k => k.StartsWith("AlterarSenha")))
-                            {
-                                @foreach (var error in ViewData.ModelState[key].Errors)
-                                {
-                                    <li>@error.ErrorMessage</li>
-                                }
-                            }
-                        </ul>
+            <div class="card shadow-sm border config-card">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="bi bi-key me-2 fs-5"></i>
+                        <h5 class="card-title fw-bold mb-0">Alterar Senha</h5>
                     </div>
-                }
 
-                <button type="submit"
-                        class="btn btn-primary btn-lg w-100 d-flex justify-content-center align-items-center">
-                    <i class="bi bi-shield-lock me-2"></i>
-                    Alterar Senha
-                </button>
-            </form>
+                    <p class="text-muted mb-4">
+                        Atualize sua senha para manter sua conta segura
+                    </p>
+
+                    @* Mensagem de erro geral *@
+                    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            @Model.ErrorMessage
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    <form method="post" asp-page-handler="AlterarSenha" novalidate autocomplete="off">
+                        @Html.AntiForgeryToken()
+
+                        <div class="mb-3">
+                            <label asp-for="AlterarSenha.SenhaAtual" class="form-label fw-600">Senha Atual *</label>
+                            <input
+                                asp-for="AlterarSenha.SenhaAtual"
+                                type="password"
+                                class="form-control form-control-lg rounded-3 config-control @(ViewData.ModelState["AlterarSenha.SenhaAtual"]?.Errors.Any() == true ? "is-invalid" : "")"
+                                placeholder="Digite sua senha atual"
+                                autocomplete="current-password" />
+                            <span asp-validation-for="AlterarSenha.SenhaAtual" class="text-danger small d-block mt-1"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="AlterarSenha.NovaSenha" class="form-label fw-600">Nova Senha *</label>
+                            <input
+                                asp-for="AlterarSenha.NovaSenha"
+                                type="password"
+                                class="form-control form-control-lg rounded-3 config-control @(ViewData.ModelState["AlterarSenha.NovaSenha"]?.Errors.Any() == true ? "is-invalid" : "")"
+                                placeholder="Digite sua nova senha"
+                                autocomplete="new-password" />
+                            <span asp-validation-for="AlterarSenha.NovaSenha" class="text-danger small d-block mt-1"></span>
+                            <small class="text-muted">
+                                Mínimo 8 caracteres com pelo menos um símbolo (@("!@#$%^&*"))
+                            </small>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="AlterarSenha.ConfirmarSenha" class="form-label fw-600">Confirmar Nova Senha *</label>
+                            <input
+                                asp-for="AlterarSenha.ConfirmarSenha"
+                                type="password"
+                                class="form-control form-control-lg rounded-3 config-control @(ViewData.ModelState["AlterarSenha.ConfirmarSenha"]?.Errors.Any() == true ? "is-invalid" : "")"
+                                placeholder="Confirme sua nova senha"
+                                autocomplete="new-password" />
+                            <span asp-validation-for="AlterarSenha.ConfirmarSenha" class="text-danger small d-block mt-1"></span>
+                        </div>
+
+                        @* Resumo de validação *@
+                        @if (!ViewData.ModelState.IsValid && ViewData.ModelState.Keys.Any(k => k.StartsWith("AlterarSenha")))
+                        {
+                            <div class="alert alert-warning">
+                                <i class="bi bi-exclamation-circle me-2"></i>
+                                <strong>Corrija os erros acima antes de continuar:</strong>
+                                <ul class="mb-0 mt-2">
+                                    @foreach (var key in ViewData.ModelState.Keys.Where(k => k.StartsWith("AlterarSenha")))
+                                    {
+                                        var modelStateEntry = ViewData.ModelState[key];
+                                        if (modelStateEntry != null)
+                                        {
+                                            foreach (var error in modelStateEntry.Errors)
+                                            {
+                                                <li>@error.ErrorMessage</li>
+                                            }
+                                        }
+                                    }
+                                </ul>
+                            </div>
+                        }
+
+                        <button
+                            type="submit"
+                            class="btn btn-primary btn-lg w-100 d-flex justify-content-center align-items-center">
+                            <i class="bi bi-shield-lock me-2"></i>
+                            Alterar Senha
+                        </button>
+                    </form>
+                </div>
+            </div>
         </div>
-    </div>
-</div>
-
-
 
         <!-- PANE: TEMA - TODOS OS USUÁRIOS -->
-        <div class="tab-pane fade @(Model.ActiveTab == "pane-tema" ? "show active" : "")" id="pane-tema" role="tabpanel" aria-labelledby="tab-tema">
+        <div
+            class="tab-pane fade @(Model.ActiveTab == "pane-tema" ? "show active" : "")"
+            id="pane-tema"
+            role="tabpanel"
+            aria-labelledby="tab-tema">
+
             <div class="card shadow-sm border config-card">
                 <div class="card-body p-4">
                     @if (isUsuario)
@@ -158,7 +199,12 @@
         <!-- PANE: USUÁRIOS (Admin/Técnico) -->
         @if (isAdminOrTechnician)
         {
-            <div class="tab-pane fade @(Model.ActiveTab == "pane-usuarios" ? "show active" : "")" id="pane-usuarios" role="tabpanel" aria-labelledby="tab-usuarios">
+            <div
+                class="tab-pane fade @(Model.ActiveTab == "pane-usuarios" ? "show active" : "")"
+                id="pane-usuarios"
+                role="tabpanel"
+                aria-labelledby="tab-usuarios">
+
                 <div class="card shadow-sm border config-card">
                     <!-- Cabeçalho do card -->
                     <div class="p-4 border-bottom">
@@ -182,7 +228,7 @@
                             </div>
                         </div>
                     }
-                    
+
                     @if (!string.IsNullOrEmpty(Model.ErrorMessage))
                     {
                         <div class="mx-4 mt-3">
@@ -199,67 +245,145 @@
                         <!-- Item 1: Registro -->
                         <div class="accordion-item">
                             <h2 class="accordion-header" id="headingManage">
-                                <button class="accordion-button custom-accordion-button collapsed" type="button"
-                                        data-bs-toggle="collapse" data-bs-target="#collapseManage"
-                                        aria-expanded="false" aria-controls="collapseManage">
-                                    <i class="bi bi-person-plus me-2"></i> Registro de Usuários
+                                <button
+                                    class="accordion-button custom-accordion-button @(Model.ActiveTab == "pane-usuarios" && ViewData.ModelState.Keys.Any(k => k.StartsWith("CriarUsuario")) ? "" : "collapsed")"
+                                    type="button"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#collapseManage"
+                                    aria-expanded="@(Model.ActiveTab == "pane-usuarios" && ViewData.ModelState.Keys.Any(k => k.StartsWith("CriarUsuario")) ? "true" : "false")"
+                                    aria-controls="collapseManage">
+                                    <i class="bi bi-person-plus me-2"></i>
+                                    Registro de Usuários
                                 </button>
                             </h2>
-                            <div id="collapseManage" class="accordion-collapse collapse"
-                                 aria-labelledby="headingManage" data-bs-parent="#accUsuarios">
+
+                            <div
+                                id="collapseManage"
+                                class="accordion-collapse collapse @(Model.ActiveTab == "pane-usuarios" && ViewData.ModelState.Keys.Any(k => k.StartsWith("CriarUsuario")) ? "show" : "")"
+                                aria-labelledby="headingManage"
+                                data-bs-parent="#accUsuarios">
+
                                 <div class="accordion-body">
+                                    @* ===== ALERT DE ERROS - FORA DO FORM ===== *@
+                                    @{
+                                        var criarUsuarioErrors = new List<string>();
+
+                                        if (Model.ActiveTab == "pane-usuarios" && !ViewData.ModelState.IsValid)
+                                        {
+                                            foreach (var key in ViewData.ModelState.Keys.Where(k => k.StartsWith("CriarUsuario")))
+                                            {
+                                                var modelStateEntry = ViewData.ModelState[key];
+                                                if (modelStateEntry != null && modelStateEntry.Errors.Any())
+                                                {
+                                                    foreach (var error in modelStateEntry.Errors)
+                                                    {
+                                                        var errorMsg = error.ErrorMessage;
+                                                        if (!string.IsNullOrEmpty(errorMsg) && !criarUsuarioErrors.Contains(errorMsg))
+                                                        {
+                                                            criarUsuarioErrors.Add(errorMsg);
+                                                        }
+                                                    }
+                                                }
+                                            }
+
+                                            if (ViewData.ModelState.ContainsKey(""))
+                                            {
+                                                var genericErrors = ViewData.ModelState[""];
+                                                if (genericErrors?.Errors.Any() == true)
+                                                {
+                                                    foreach (var error in genericErrors.Errors)
+                                                    {
+                                                        var errorMsg = error.ErrorMessage;
+                                                        if (!string.IsNullOrEmpty(errorMsg) && !criarUsuarioErrors.Contains(errorMsg))
+                                                        {
+                                                            criarUsuarioErrors.Add(errorMsg);
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    @if (criarUsuarioErrors.Any())
+                                    {
+                                        <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+                                            <div class="d-flex align-items-start">
+                                                <i class="bi bi-exclamation-triangle-fill me-2 flex-shrink-0 mt-1"></i>
+                                                <div class="flex-grow-1">
+                                                    <strong>Não foi possível criar o usuário.</strong>
+                                                    <p class="mb-2 mt-1">Por favor, corrija os seguintes erros:</p>
+                                                    <ul class="mb-0">
+                                                        @foreach (var errorMsg in criarUsuarioErrors)
+                                                        {
+                                                            <li>@errorMsg</li>
+                                                        }
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                        </div>
+                                    }
 
                                     @* Formulário *@
                                     <form method="post" asp-page-handler="CriarUsuario" novalidate autocomplete="off">
                                         @Html.AntiForgeryToken()
-                                        
+
                                         <div class="row g-3">
                                             @* Nome e Sobrenome *@
                                             <div class="col-md-6">
                                                 <label asp-for="CriarUsuario.Nome" class="form-label fw-600">Nome *</label>
-                                                <input asp-for="CriarUsuario.Nome" 
-                                                       class="form-control form-control-lg rounded-3 config-control"
-                                                       placeholder="Digite o nome"
-                                                       autocomplete="off" />
+                                                <input
+                                                    asp-for="CriarUsuario.Nome"
+                                                    class="form-control form-control-lg rounded-3 config-control"
+                                                    placeholder="Digite o nome"
+                                                    autocomplete="off" />
                                                 <span asp-validation-for="CriarUsuario.Nome" class="text-danger small"></span>
                                             </div>
+
                                             <div class="col-md-6">
                                                 <label asp-for="CriarUsuario.Sobrenome" class="form-label fw-600">Sobrenome *</label>
-                                                <input asp-for="CriarUsuario.Sobrenome" 
-                                                       class="form-control form-control-lg rounded-3 config-control"
-                                                       placeholder="Digite o sobrenome"
-                                                       autocomplete="off" />
+                                                <input
+                                                    asp-for="CriarUsuario.Sobrenome"
+                                                    class="form-control form-control-lg rounded-3 config-control"
+                                                    placeholder="Digite o sobrenome"
+                                                    autocomplete="off" />
                                                 <span asp-validation-for="CriarUsuario.Sobrenome" class="text-danger small"></span>
                                             </div>
 
                                             @* Email e Telefone *@
                                             <div class="col-md-6">
                                                 <label asp-for="CriarUsuario.Email" class="form-label fw-600">E-mail *</label>
-                                                <input asp-for="CriarUsuario.Email" 
-                                                       type="email"
-                                                       class="form-control form-control-lg rounded-3 config-control"
-                                                       placeholder="Digite o e-mail"
-                                                       autocomplete="new-email"
-                                                       data-lpignore="true"
-                                                       data-form-type="other" />
+                                                <input
+                                                    asp-for="CriarUsuario.Email"
+                                                    type="email"
+                                                    class="form-control form-control-lg rounded-3 config-control"
+                                                    placeholder="exemplo@dominio.com"
+                                                    autocomplete="new-email"
+                                                    data-lpignore="true"
+                                                    data-form-type="other" />
                                                 <span asp-validation-for="CriarUsuario.Email" class="text-danger small"></span>
                                             </div>
+
                                             <div class="col-md-6">
                                                 <label asp-for="CriarUsuario.Telefone" class="form-label fw-600">Telefone</label>
-                                                <input asp-for="CriarUsuario.Telefone" 
-                                                       type="text"
-                                                       class="form-control form-control-lg rounded-3 config-control"
-                                                       placeholder="(11) 99999-9999"
-                                                       maxlength="15"
-                                                       id="telefoneInput"
-                                                       autocomplete="off" />
+                                                <input
+                                                    asp-for="CriarUsuario.Telefone"
+                                                    type="text"
+                                                    class="form-control form-control-lg rounded-3 config-control"
+                                                    placeholder="(11) 99999-9999"
+                                                    maxlength="15"
+                                                    id="telefoneInput"
+                                                    autocomplete="off" />
                                                 <span asp-validation-for="CriarUsuario.Telefone" class="text-danger small"></span>
                                             </div>
 
                                             @* Departamento e Cargo *@
                                             <div class="col-md-6">
                                                 <label asp-for="CriarUsuario.Departamento" class="form-label fw-600">Departamento</label>
-                                                <select asp-for="CriarUsuario.Departamento" class="form-select form-select-lg rounded-3 config-control" autocomplete="off">
+                                                <select
+                                                    asp-for="CriarUsuario.Departamento"
+                                                    class="form-select form-select-lg rounded-3 config-control"
+                                                    autocomplete="off">
                                                     <option value="">Selecione um departamento</option>
                                                     <option value="TI">Tecnologia da Informação</option>
                                                     <option value="RH">Recursos Humanos</option>
@@ -272,9 +396,13 @@
                                                 </select>
                                                 <span asp-validation-for="CriarUsuario.Departamento" class="text-danger small"></span>
                                             </div>
+
                                             <div class="col-md-6">
                                                 <label asp-for="CriarUsuario.Cargo" class="form-label fw-600">Cargo</label>
-                                                <select asp-for="CriarUsuario.Cargo" class="form-select form-select-lg rounded-3 config-control" autocomplete="off">
+                                                <select
+                                                    asp-for="CriarUsuario.Cargo"
+                                                    class="form-select form-select-lg rounded-3 config-control"
+                                                    autocomplete="off">
                                                     <option value="">Selecione um cargo</option>
                                                     <option value="Estagiario">Estagiário</option>
                                                     <option value="Analista Jr">Analista Júnior</option>
@@ -293,7 +421,10 @@
                                             @* Tipo de Usuário e Senha *@
                                             <div class="col-md-6">
                                                 <label asp-for="CriarUsuario.TipoUsuario" class="form-label fw-600">Tipo de Usuário *</label>
-                                                <select asp-for="CriarUsuario.TipoUsuario" class="form-select form-select-lg rounded-3 config-control" autocomplete="off">
+                                                <select
+                                                    asp-for="CriarUsuario.TipoUsuario"
+                                                    class="form-select form-select-lg rounded-3 config-control"
+                                                    autocomplete="off">
                                                     <option value="">Selecione o tipo</option>
                                                     <option value="Usuario">Usuário</option>
                                                     <option value="Tecnico">Técnico</option>
@@ -301,32 +432,36 @@
                                                 </select>
                                                 <span asp-validation-for="CriarUsuario.TipoUsuario" class="text-danger small"></span>
                                             </div>
+
                                             <div class="col-md-6">
                                                 <label asp-for="CriarUsuario.Senha" class="form-label fw-600">Senha *</label>
-                                                <input asp-for="CriarUsuario.Senha" 
-                                                       type="password"
-                                                       class="form-control form-control-lg rounded-3 config-control"
-                                                       placeholder="Mínimo 8 caracteres com 1 símbolo"
-                                                       autocomplete="new-password"
-                                                       data-lpignore="true"
-                                                       data-form-type="other" />
+                                                <input
+                                                    asp-for="CriarUsuario.Senha"
+                                                    type="password"
+                                                    class="form-control form-control-lg rounded-3 config-control"
+                                                    placeholder="Mínimo 8 caracteres com 1 símbolo"
+                                                    autocomplete="new-password"
+                                                    data-lpignore="true"
+                                                    data-form-type="other" />
                                                 <span asp-validation-for="CriarUsuario.Senha" class="text-danger small"></span>
                                             </div>
 
-                                            @* Informações da senha *@
+                                            @* Informações *@
                                             <div class="col-12">
                                                 <div class="form-text">
                                                     <small class="text-muted">
                                                         <i class="bi bi-info-circle me-1"></i>
-                                                        <strong>*</strong> Campos obrigatórios | A senha deve ter no mínimo 8 caracteres e pelo menos um símbolo especial
+                                                        <strong>*</strong> Campos obrigatórios |
+                                                        A senha deve ter no mínimo 8 caracteres e pelo menos um símbolo especial
                                                     </small>
                                                 </div>
                                             </div>
 
                                             @* Botão Criar *@
                                             <div class="col-12">
-                                                <button type="submit"
-                                                        class="btn btn-primary btn-lg w-100 d-flex align-items-center justify-content-center">
+                                                <button
+                                                    type="submit"
+                                                    class="btn btn-primary btn-lg w-100 d-flex align-items-center justify-content-center">
                                                     <i class="bi bi-person-plus-fill me-2"></i>
                                                     Criar Usuário
                                                 </button>
@@ -342,16 +477,25 @@
                         {
                             <div class="accordion-item">
                                 <h2 class="accordion-header" id="headingView">
-                                    <button class="accordion-button custom-accordion-button collapsed" type="button"
-                                            data-bs-toggle="collapse" data-bs-target="#collapseView"
-                                            aria-expanded="false" aria-controls="collapseView">
-                                        <i class="bi bi-table me-2"></i> Tabela de Usuários
+                                    <button
+                                        class="accordion-button custom-accordion-button collapsed"
+                                        type="button"
+                                        data-bs-toggle="collapse"
+                                        data-bs-target="#collapseView"
+                                        aria-expanded="false"
+                                        aria-controls="collapseView">
+                                        <i class="bi bi-table me-2"></i>
+                                        Tabela de Usuários
                                     </button>
                                 </h2>
-                                <div id="collapseView" class="accordion-collapse collapse"
-                                     aria-labelledby="headingView" data-bs-parent="#accUsuarios">
+
+                                <div
+                                    id="collapseView"
+                                    class="accordion-collapse collapse"
+                                    aria-labelledby="headingView"
+                                    data-bs-parent="#accUsuarios">
+
                                     <div class="accordion-body p-0">
-                                        
                                         @if (Model.Usuarios.Any())
                                         {
                                             <div class="table-responsive">
@@ -401,7 +545,9 @@
                                                                         "Admin" => "danger",
                                                                         "Tecnico" => "warning text-dark",
                                                                         _ => "primary"
-                                                                    })">@usuario.TipoUsuario</span>
+                                                                    })">
+                                                                        @usuario.TipoUsuario
+                                                                    </span>
                                                                 </td>
                                                                 <td>
                                                                     <small class="text-muted">
@@ -414,16 +560,19 @@
                                                                     </small>
                                                                 </td>
                                                                 <td class="text-center">
-                                                                    <button type="button" 
-                                                                            class="btn btn-sm btn-outline-primary me-1"
-                                                                            onclick="editarUsuario(@usuario.Id, '@Html.Raw(usuario.Nome.Replace("'", "\\'"))', '@Html.Raw(usuario.Email.Replace("'", "\\'"))', '@Html.Raw((usuario.Telefone ?? "").Replace("'", "\\'"))', '@Html.Raw((usuario.Departamento ?? "").Replace("'", "\\'"))', '@Html.Raw((usuario.Cargo ?? "").Replace("'", "\\'"))', '@usuario.TipoUsuario')"
-                                                                            title="Editar usuário">
+                                                                    <button
+                                                                        type="button"
+                                                                        class="btn btn-sm btn-outline-primary me-1"
+                                                                        onclick="editarUsuario(@usuario.Id, '@Html.Raw(usuario.Nome.Replace("'", "\\'"))', '@Html.Raw(usuario.Email.Replace("'", "\\'"))', '@Html.Raw((usuario.Telefone ?? "").Replace("'", "\\'"))', '@Html.Raw((usuario.Departamento ?? "").Replace("'", "\\'"))', '@Html.Raw((usuario.Cargo ?? "").Replace("'", "\\'"))', '@usuario.TipoUsuario')"
+                                                                        title="Editar usuário">
                                                                         <i class="bi bi-pencil"></i>
                                                                     </button>
-                                                                    <button type="button" 
-                                                                            class="btn btn-sm btn-outline-danger"
-                                                                            onclick="excluirUsuario(@usuario.Id, '@Html.Raw(usuario.Nome.Replace("'", "\\'"))')"
-                                                                            title="Excluir usuário">
+
+                                                                    <button
+                                                                        type="button"
+                                                                        class="btn btn-sm btn-outline-danger"
+                                                                        onclick="excluirUsuario(@usuario.Id, '@Html.Raw(usuario.Nome.Replace("'", "\\'"))')"
+                                                                        title="Excluir usuário">
                                                                         <i class="bi bi-trash"></i>
                                                                     </button>
                                                                 </td>
@@ -445,9 +594,9 @@
                                 </div>
                             </div>
                         }
-                    </div>
-                </div>
-            </div>
+                    </div> <!-- /accordion -->
+                </div> <!-- /card -->
+            </div> <!-- /tab-pane: usuarios -->
         }
         else
         {
@@ -461,9 +610,8 @@
                 </div>
             </div>
         }
-
-    </div>
-</div>
+    </div> <!-- /tab-content -->
+</div> <!-- /container -->
 
 <!-- Modal de Edição de Usuário (APENAS ADMIN) -->
 @if (isAdmin)
@@ -487,37 +635,33 @@
                             <!-- Nome e Sobrenome -->
                             <div class="col-md-6">
                                 <label asp-for="EditarUsuario.Nome" class="form-label">Nome *</label>
-                                <input asp-for="EditarUsuario.Nome" 
-                                       class="form-control" 
-                                       autocomplete="off" />
+                                <input asp-for="EditarUsuario.Nome" class="form-control" autocomplete="off" />
                                 <span asp-validation-for="EditarUsuario.Nome" class="text-danger small"></span>
                             </div>
+
                             <div class="col-md-6">
                                 <label asp-for="EditarUsuario.Sobrenome" class="form-label">Sobrenome *</label>
-                                <input asp-for="EditarUsuario.Sobrenome" 
-                                       class="form-control" 
-                                       autocomplete="off" />
+                                <input asp-for="EditarUsuario.Sobrenome" class="form-control" autocomplete="off" />
                                 <span asp-validation-for="EditarUsuario.Sobrenome" class="text-danger small"></span>
                             </div>
 
                             <!-- Email e Telefone -->
                             <div class="col-md-6">
                                 <label asp-for="EditarUsuario.Email" class="form-label">E-mail *</label>
-                                <input asp-for="EditarUsuario.Email" 
-                                       type="email"
-                                       class="form-control" 
-                                       autocomplete="new-email" />
+                                <input asp-for="EditarUsuario.Email" type="email" class="form-control" autocomplete="new-email" />
                                 <span asp-validation-for="EditarUsuario.Email" class="text-danger small"></span>
                             </div>
+
                             <div class="col-md-6">
                                 <label asp-for="EditarUsuario.Telefone" class="form-label">Telefone</label>
-                                <input asp-for="EditarUsuario.Telefone" 
-                                       type="text"
-                                       class="form-control" 
-                                       placeholder="(11) 99999-9999"
-                                       maxlength="15"
-                                       id="editTelefone"
-                                       autocomplete="off" />
+                                <input
+                                    asp-for="EditarUsuario.Telefone"
+                                    type="text"
+                                    class="form-control"
+                                    placeholder="(11) 99999-9999"
+                                    maxlength="15"
+                                    id="editTelefone"
+                                    autocomplete="off" />
                                 <span asp-validation-for="EditarUsuario.Telefone" class="text-danger small"></span>
                             </div>
 
@@ -536,6 +680,7 @@
                                     <option value="Diretoria">Diretoria</option>
                                 </select>
                             </div>
+
                             <div class="col-md-6">
                                 <label asp-for="EditarUsuario.Cargo" class="form-label">Cargo</label>
                                 <select asp-for="EditarUsuario.Cargo" class="form-select">
@@ -562,13 +707,15 @@
                                     <option value="Admin">Administrador</option>
                                 </select>
                             </div>
+
                             <div class="col-md-6">
                                 <label asp-for="EditarUsuario.NovaSenha" class="form-label">Nova Senha</label>
-                                <input asp-for="EditarUsuario.NovaSenha" 
-                                       type="password"
-                                       class="form-control" 
-                                       placeholder="Deixe em branco para manter atual"
-                                       autocomplete="new-password" />
+                                <input
+                                    asp-for="EditarUsuario.NovaSenha"
+                                    type="password"
+                                    class="form-control"
+                                    placeholder="Deixe em branco para manter atual"
+                                    autocomplete="new-password" />
                                 <span asp-validation-for="EditarUsuario.NovaSenha" class="text-danger small"></span>
                                 <small class="text-muted">Deixe em branco para não alterar a senha</small>
                             </div>
@@ -578,7 +725,8 @@
                     <div class="modal-footer bg-light">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                         <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-check-lg me-1"></i>Salvar Alterações
+                            <i class="bi bi-check-lg me-1"></i>
+                            Salvar Alterações
                         </button>
                     </div>
                 </form>
@@ -588,51 +736,62 @@
 }
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Máscara de telefone para o formulário de criar
-    const telefoneInput = document.getElementById('telefoneInput');
-    
-    if (telefoneInput) {
-        telefoneInput.addEventListener('input', aplicarMascaraTelefone);
-    }
+    document.addEventListener('DOMContentLoaded', function () {
+        // ===== VERIFICAR ABA ATIVA E MANTER ACCORDION ABERTO SE HOUVER ERROS =====
+        const activeTab = '@Model.ActiveTab';
 
-    // Máscara para telefone no modal de edição
-    const editTelefoneInput = document.getElementById('editTelefone');
-    
-    if (editTelefoneInput) {
-        editTelefoneInput.addEventListener('input', aplicarMascaraTelefone);
-    }
-    
-    function aplicarMascaraTelefone(e) {
-        let value = e.target.value.replace(/\D/g, '');
-        
-        if (value.length > 0) {
-            if (value.length <= 2) {
-                value = '(' + value;
-            } else if (value.length <= 7) {
-                value = '(' + value.slice(0, 2) + ') ' + value.slice(2);
-            } else {
-                value = '(' + value.slice(0, 2) + ') ' + value.slice(2, 7) + '-' + value.slice(7, 11);
+        if (activeTab === 'pane-usuarios') {
+            const hasErrors =
+                document.querySelectorAll('span.text-danger.small').length > 0 ||
+                document.querySelectorAll('.alert-danger').length > 0;
+
+            if (hasErrors) {
+                const collapseManage = document.getElementById('collapseManage');
+                if (collapseManage && !collapseManage.classList.contains('show')) {
+                    bootstrap.Collapse.getOrCreateInstance(collapseManage, { toggle: true });
+                }
             }
         }
-        
-        e.target.value = value;
-    }
-});
 
-// Verificar se usuário é admin
-var isUserAdmin = @(isAdmin ? "true" : "false");
+        // ===== MÁSCARAS DE TELEFONE =====
+        const telefoneInput = document.getElementById('telefoneInput');
+        if (telefoneInput) {
+            telefoneInput.addEventListener('input', aplicarMascaraTelefone);
+        }
 
-if (isUserAdmin) {
-    function editarUsuario(id, nomeCompleto, email, telefone, departamento, cargo, tipoUsuario) {
+        const editTelefoneInput = document.getElementById('editTelefone');
+        if (editTelefoneInput) {
+            editTelefoneInput.addEventListener('input', aplicarMascaraTelefone);
+        }
+
+        function aplicarMascaraTelefone(e) {
+            let v = e.target.value.replace(/\D/g, '');
+            if (v.length > 0) {
+                if (v.length <= 2) {
+                    v = '(' + v;
+                } else if (v.length <= 7) {
+                    v = '(' + v.slice(0, 2) + ') ' + v.slice(2);
+                } else {
+                    v = '(' + v.slice(0, 2) + ') ' + v.slice(2, 7) + '-' + v.slice(7, 11);
+                }
+            }
+            e.target.value = v;
+        }
+    });
+
+    // ===== VARIÁVEL GLOBAL PARA VERIFICAR SE É ADMIN =====
+    const isUserAdmin = @Json.Serialize(isAdmin);
+
+    // ===== FUNÇÃO PARA EDITAR USUÁRIO =====
+    window.editarUsuario = function (id, nomeCompleto, email, telefone, departamento, cargo, tipoUsuario) {
+        if (!isUserAdmin) return;
+
         console.log('Editando usuário:', { id, nomeCompleto, email, telefone, departamento, cargo, tipoUsuario });
-        
-        // Separar nome e sobrenome
-        const partesNome = nomeCompleto.split(' ');
-        const nome = partesNome[0] || '';
-        const sobrenome = partesNome.slice(1).join(' ') || '';
-        
-        // Preencher campos do modal usando os nomes asp-for corretos
+
+        const partes = nomeCompleto.split(' ');
+        const nome = partes[0] || '';
+        const sobrenome = partes.slice(1).join(' ') || '';
+
         document.querySelector('input[name="EditarUsuario.Id"]').value = id;
         document.querySelector('input[name="EditarUsuario.Nome"]').value = nome;
         document.querySelector('input[name="EditarUsuario.Sobrenome"]').value = sobrenome;
@@ -641,19 +800,23 @@ if (isUserAdmin) {
         document.querySelector('select[name="EditarUsuario.Departamento"]').value = departamento || '';
         document.querySelector('select[name="EditarUsuario.Cargo"]').value = cargo || '';
         document.querySelector('select[name="EditarUsuario.TipoUsuario"]').value = tipoUsuario;
-        
-        // Limpar campo de nova senha
+
+        // Limpar senha
         document.querySelector('input[name="EditarUsuario.NovaSenha"]').value = '';
-        
-        // Exibir modal
+
+        // Abrir modal
         const modal = new bootstrap.Modal(document.getElementById('editarUsuarioModal'));
         modal.show();
-    }
+    };
 
-    function excluirUsuario(id, nome) {
-        if (confirm('Tem certeza que deseja excluir o usuário "' + nome + '"?\n\nEsta ação não pode ser desfeita.')) {
+    // ===== FUNÇÃO PARA EXCLUIR USUÁRIO =====
+    window.excluirUsuario = function (id, nome) {
+        if (!isUserAdmin) return;
+
+        if (confirm(`Tem certeza que deseja excluir o usuário "${nome}"?\n\nEsta ação não pode ser desfeita.`)) {
             alert('Funcionalidade de exclusão ainda não implementada');
+            // TODO: Implementar chamada para excluir usuário
+            // window.location.href = `/Configurar?handler=ExcluirUsuario&id=${id}`;
         }
-    }
-}
+    };
 </script>
