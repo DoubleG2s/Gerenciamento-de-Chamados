@@ -11,6 +11,9 @@ builder.Services.AddRazorPages();
 // Mock store (singleton em memória)
 builder.Services.AddSingleton<InMemoryTicketStore>();
 
+
+
+
 builder.Services
     .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(opt =>
@@ -42,6 +45,12 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
     app.UseHsts();
+}
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.EnsureCreated();
 }
 
 app.UseHttpsRedirection();
