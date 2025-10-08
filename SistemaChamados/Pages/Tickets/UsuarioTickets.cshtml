@@ -158,10 +158,10 @@
                                        id="anexosInput"
                                        asp-for="Input.Anexos"
                                        multiple 
-                                       accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.gif,.zip,.rar" />
-                                <small class="text-muted">
-                                    Tipos permitidos: PDF, DOC, TXT, Imagens, ZIP, RAR (máx. 10MB cada, máx. 5 arquivos)
-                                </small>
+                                       accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.gif,.zip,.rar,.xlsx,.xls,.pptx,.ppt" />
+                                    <small class="text-muted">
+                                        Tipos permitidos: PDF, DOC, Excel, PowerPoint, TXT, Imagens, ZIP, RAR (máx. 10MB cada, máx. 5 arquivos)
+                                    </small>
                             </div>
                             <div id="anexosPreview" class="mt-2"></div>
                         </div>
@@ -200,7 +200,7 @@
             if (files.length === 0) return;
             
             const maxSize = 10 * 1024 * 1024; // 10MB
-            const allowedTypes = ['.pdf', '.doc', '.docx', '.txt', '.jpg', '.jpeg', '.png', '.gif', '.zip', '.rar'];
+            const allowedTypes = ['.pdf', '.doc', '.docx', '.txt', '.jpg', '.jpeg', '.png', '.gif', '.zip', '.rar', '.xlsx', '.xls', '.pptx', '.ppt'];
             
             Array.from(files).forEach((file, index) => {
                 const fileSize = (file.size / 1024 / 1024).toFixed(2);

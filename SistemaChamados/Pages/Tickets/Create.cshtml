@@ -55,16 +55,21 @@
             <!-- Anexos -->
             <div class="form-group">
                 <label>Anexos</label>
-                <div class="attach-row">
-                    <button type="button" class="btn btn-outline" id="btnAnexar">
-                        <span class="clip">📎</span> Anexar Arquivos
-                    </button>
-                    <input type="file" id="fileInput" name="Input.Anexos" multiple
-                           data-max-files="10" data-max-size-mb="10" class="file-hidden" />
-                    <span class="hint">PDF, DOC, TXT, imagens (máx. 10MB cada)</span>
+                <div class="mb-2">
+                    <input type="file"
+                           class="form-control"
+                           id="fileInput"
+                           name="Input.Anexos"
+                           multiple
+                           accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.gif,.zip,.rar,.xlsx,.xls,.pptx,.ppt"
+                           style="display: none;" />
+                    <small class="text-muted ms-2">
+                        PDF, DOC, Excel, PowerPoint, TXT, Imagens, ZIP, RAR (máx. 10MB cada, máx. 10 arquivos)
+                    </small>
                 </div>
                 <div id="filePreview" class="file-preview"></div>
             </div>
+
 
             <div class="create-actions">
                 <a asp-page="./Index" class="btn btn-secondary">Cancelar</a>
@@ -76,4 +81,93 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // ===== BOTÃO DE ANEXAR ABRE O FILE INPUT =====
+            const btnAnexar = document.getElementById('btnAnexar');
+            const fileInput = document.getElementById('fileInput');
+            const filePreview = document.getElementById('filePreview');
+
+            if (btnAnexar && fileInput) {
+                btnAnexar.addEventListener('click', function() {
+                    fileInput.click();
+                });
+            }
+
+            // ===== PREVIEW DE ANEXOS COM VALIDAÇÃO =====
+            if (fileInput && filePreview) {
+                fileInput.addEventListener('change', function(e) {
+                    filePreview.innerHTML = '';
+
+                    const files = e.target.files;
+                    if (files.length === 0) {
+                        // Resetar texto do botão se nenhum arquivo
+                        if (btnAnexar) {
+                            btnAnexar.innerHTML = '<span class="clip">📎</span> Anexar Arquivos';
+                        }
+                        return;
+                    }
+
+                    const maxSize = 10 * 1024 * 1024; // 10MB
+                    const maxFiles = 10;
+                    const allowedTypes = ['.pdf', '.doc', '.docx', '.txt', '.jpg', '.jpeg', '.png', '.gif', '.zip', '.rar', '.xlsx', '.xls', '.pptx', '.ppt'];
+
+                    // Verificar número de arquivos
+                    if (files.length > maxFiles) {
+                        const warningDiv = document.createElement('div');
+                        warningDiv.className = 'alert alert-warning d-flex align-items-center mb-2';
+                        warningDiv.innerHTML = `
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            <span>Você selecionou ${files.length} arquivos. Máximo permitido: ${maxFiles} arquivos.</span>
+                        `;
+                        filePreview.appendChild(warningDiv);
+                    }
+
+                    // Mostrar cada arquivo
+                    Array.from(files).forEach((file, index) => {
+                        const fileSize = (file.size / 1024 / 1024).toFixed(2);
+                        const fileExt = '.' + file.name.split('.').pop().toLowerCase();
+
+                        let statusClass = 'text-success';
+                        let statusIcon = 'bi-check-circle-fill';
+                        let statusText = `${fileSize} MB`;
+
+                        if (file.size > maxSize) {
+                            statusClass = 'text-danger';
+                            statusIcon = 'bi-x-circle-fill';
+                            statusText = `${fileSize} MB - Muito grande (máx. 10MB)`;
+                        } else if (!allowedTypes.includes(fileExt)) {
+                            statusClass = 'text-danger';
+                            statusIcon = 'bi-x-circle-fill';
+                            statusText = `Tipo não permitido`;
+                        }
+
+                        const fileItem = document.createElement('div');
+                        fileItem.className = 'd-flex align-items-center justify-content-between p-3 border rounded mb-2 bg-light';
+                        fileItem.innerHTML = `
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-paperclip me-2 fs-5"></i>
+                                <div>
+                                    <div class="fw-medium">${file.name}</div>
+                                    <small class="text-muted">Arquivo ${index + 1} de ${files.length}</small>
+                                </div>
+                            </div>
+                            <div class="${statusClass}">
+                                <i class="bi ${statusIcon} me-1"></i>
+                                <small>${statusText}</small>
+                            </div>
+                        `;
+                        filePreview.appendChild(fileItem);
+                    });
+
+                    // Atualizar texto do botão
+                    if (btnAnexar && files.length > 0) {
+                        btnAnexar.innerHTML = `<span class="clip">📎</span> ${files.length} arquivo(s) selecionado(s)`;
+                    }
+                });
+            }
+        });
+    </script>
 }
+

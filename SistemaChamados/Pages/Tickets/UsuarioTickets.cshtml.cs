@@ -189,7 +189,7 @@ namespace SistemaChamados.Pages.Tickets
             const long maxTamanhoBytes = 10 * 1024 * 1024; // 10MB
             const int maxArquivos = 5;
 
-            var extensoesPermitidas = new[] { ".pdf", ".doc", ".docx", ".txt", ".jpg", ".jpeg", ".png", ".gif", ".zip", ".rar" };
+            var extensoesPermitidas = new[] { ".pdf", ".doc", ".docx", ".txt", ".jpg", ".jpeg", ".png", ".gif", ".zip", ".rar", ".xlsx", ".xls", ".pptx", ".ppt" };
 
             if (anexos.Count > maxArquivos)
             {
