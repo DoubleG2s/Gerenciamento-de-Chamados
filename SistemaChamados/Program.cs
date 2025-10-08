@@ -8,6 +8,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Razor Pages
 builder.Services.AddRazorPages();
 
+//Suporte a rotas de API
+builder.Services.AddControllers();
+
 // Mock store (singleton em memória)
 builder.Services.AddSingleton<InMemoryTicketStore>();
 
@@ -68,6 +71,9 @@ app.Use(async (context, next) =>
 app.UseAuthorization(); // <- importante ser depois do UseAuthentication
 
 app.MapRazorPages();
+
+//Ativa as rota de API
+app.MapControllers();
 
 // Endpoint de teste do DB (opcional)
 app.MapGet("/ping-db", async (AppDbContext db) =>
