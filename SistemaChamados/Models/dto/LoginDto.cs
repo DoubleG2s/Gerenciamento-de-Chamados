@@ -1,4 +1,4 @@
-﻿namespace SistemaChamados.Models
+﻿namespace SistemaChamados.Models.dto
 {
     public class LoginDto
     {

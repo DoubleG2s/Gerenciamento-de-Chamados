@@ -49,7 +49,7 @@ namespace SistemaChamados.Controllers
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SistemaChamados.Data;
-using SistemaChamados.Models;
+using SistemaChamados.Models.dto;
 
 namespace SistemaChamados.Controllers
 {
