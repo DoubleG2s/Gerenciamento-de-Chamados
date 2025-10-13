@@ -45,6 +45,9 @@
         <div class="grid">
             @foreach (var ticket in Model.MeusTickets)
             {
+                //não exibir tickets fechados
+                if (ticket.Status == TicketStatus.Fechado) continue;
+
                 <a class="card ticket" asp-page="/Tickets/Detalhes" asp-route-id="@ticket.Id">
                     <div class="ticket-title">@ticket.Titulo</div>
                     <div class="badges">

@@ -361,3 +361,20 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+##########################################################################
+# CONFIGURAÇÕES SENSÍVEIS - NÃO COMMITAR
+##########################################################################
+
+# Arquivos de configuração com senhas/credenciais
+appsettings.Development.json
+appsettings.Production.json
+appsettings.Staging.json
+appsettings.*.json
+!appsettings.json
+
+# Pasta de uploads de usuários
+wwwroot/uploads/
+
+# User Secrets (caso use)
+secrets.json
