@@ -378,3 +378,4 @@ wwwroot/uploads/
 
 # User Secrets (caso use)
 secrets.json
+/SistemaChamados/appsettings.json
