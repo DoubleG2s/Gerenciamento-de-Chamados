@@ -1,14 +1,28 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using SistemaChamados.Data;
 
 namespace SistemaChamados.Controllers
 {
     [ApiController]
-    [Route("api/mobile/auth")]
+    [Route("api/mobile/ticket")]
     public class MobileTicketsController : Controller
     {
-        public IActionResult Index()
+        private readonly AppDbContext _context;
+
+        public MobileTicketsController(AppDbContext context)
         {
-            return View();
+            _context = context;
         }
+        [HttpGet("{id}")]
+        public ActionResult getTickets(int id)
+        {
+            var tickets = _context.Tickets.FirstOrDefault(p => p.Id == id);
+
+            if (tickets == null) {
+                return NotFound();
+            }
+
+            return Ok(tickets);
+        } 
     }
 }
