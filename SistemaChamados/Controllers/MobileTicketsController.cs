@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SistemaChamados.Data;
+using SistemaChamados.Models;
 
 namespace SistemaChamados.Controllers
 {
@@ -16,7 +17,7 @@ namespace SistemaChamados.Controllers
         [HttpGet("{id}")]
         public ActionResult getTickets(int id)
         {
-            var tickets = _context.Tickets.FirstOrDefault(p => p.Id == id);
+            List<Ticket> tickets = _context.Tickets.Where(p => p.SolicitanteId == id).ToList(); ;
 
             if (tickets == null) {
                 return NotFound();
