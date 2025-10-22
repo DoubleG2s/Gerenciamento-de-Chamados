@@ -76,6 +76,13 @@ namespace SistemaChamados.Pages.Tickets
                         _logger.LogInformation("Filtro de status aplicado: {Status}", statusEnum);
                     }
                 }
+                else
+                {
+                    // FILTRO PADRÃO: Exclui tickets com status "Fechado" quando nenhum filtro de status é aplicado
+                    // Os tickets fechados só serão exibidos quando o usuário clicar explicitamente no filtro "Fechados"
+                    query = query.Where(t => t.Status != TicketStatus.Fechado);
+                    _logger.LogInformation("Filtro padrão aplicado: Excluindo tickets com status Fechado");
+                }
 
                 // Buscar todos os tickets (Admin/Técnico podem ver todos)
                 Items = await query
