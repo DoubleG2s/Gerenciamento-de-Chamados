@@ -1,0 +1,138 @@
+@page
+@model SistemaChamados.Pages.Chat.TestModel
+@{
+    ViewData["Title"] = "Teste do Chat IA";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste do Chat IA</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .chat-container { height: 400px; overflow-y: auto; background: #f8f9fa; }
+        .message { margin: 10px 0; }
+        .user-message { text-align: right; }
+        .bot-message { text-align: left; }
+        .message-bubble { 
+            display: inline-block; 
+            max-width: 70%; 
+            padding: 10px 15px; 
+            border-radius: 15px; 
+            margin: 5px;
+        }
+        .user-message .message-bubble { background: #007bff; color: white; }
+        .bot-message .message-bubble { background: white; color: #333; border: 1px solid #ddd; }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <h2>Teste do Chat IA</h2>
+                <div class="card">
+                    <div class="card-header">
+                        <strong>Assistente Virtual</strong>
+                        <span id="status" class="badge bg-success float-end">Online</span>
+                    </div>
+                    <div class="card-body">
+                        <div id="chat" class="chat-container p-3"></div>
+                        <div class="input-group mt-3">
+                            <input type="text" id="message" class="form-control" placeholder="Digite sua mensagem...">
+                            <button id="send" class="btn btn-primary">Enviar</button>
+                        </div>
+                        <div class="form-check mt-2">
+                            <input class="form-check-input" type="checkbox" id="audioEnabled" checked>
+                            <label class="form-check-label" for="audioEnabled">
+                                Ativar áudio
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const chat = document.getElementById('chat');
+        const messageInput = document.getElementById('message');
+        const sendButton = document.getElementById('send');
+        const audioEnabled = document.getElementById('audioEnabled');
+
+        function addMessage(text, isUser = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+            
+            const bubble = document.createElement('div');
+            bubble.className = 'message-bubble';
+            bubble.textContent = text;
+            
+            messageDiv.appendChild(bubble);
+            chat.appendChild(messageDiv);
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        async function sendMessage() {
+            const message = messageInput.value.trim();
+            if (!message) return;
+
+            addMessage(message, true);
+            messageInput.value = '';
+
+            try {
+                const response = await fetch('/api/chat/send', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        generateAudio: audioEnabled.checked
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    addMessage(data.response);
+                    
+                    if (data.isResolved) {
+                        addMessage('Chat encerrado. Obrigado por usar nosso assistente!');
+                    }
+                    
+                    if (data.audioBase64 && audioEnabled.checked) {
+                        playAudio(data.audioBase64);
+                    }
+                } else {
+                    addMessage('Erro ao processar mensagem. Tente novamente.');
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                addMessage('Erro de conexão. Verifique se o servidor está online.');
+            }
+        }
+
+        function playAudio(base64Audio) {
+            try {
+                const audio = new Audio('data:audio/wav;base64,' + base64Audio);
+                audio.play().catch(e => console.log('Erro ao tocar áudio:', e));
+            } catch (error) {
+                console.log('Erro ao processar áudio:', error);
+            }
+        }
+
+        sendButton.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Mensagem inicial
+        addMessage('Olá! Sou o assistente virtual. Como posso ajudar você hoje?');
+    </script>
+</body>
+</html>
