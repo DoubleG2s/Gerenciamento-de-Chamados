@@ -59,7 +59,7 @@ Este projeto foi criado com **fins acadêmicos** nas dependências da
 
 O projeto segue uma **estrutura modular organizada**:
 
-📂 Gerenciamento-de-Chamados/
+📂 Gerenciamento-de-Chamados/ <br>
 ├── 📁 Models/ # Modelos de dados (Entidades, DTOs) <br>
 ├── 📁 Services/ # Lógica de negócio e integração com o banco de dados <br>
 ├── 📁 Pages/ # Páginas Blazor (UI) <br>
