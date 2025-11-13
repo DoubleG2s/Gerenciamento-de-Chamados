@@ -116,26 +116,29 @@ dotnet run
 6. Acesse no navegador:
 http://localhost:5000
 
-💡 Objetivo Acadêmico <br>
+## 💡 Objetivo Acadêmico <br>
 
 Este projeto foi desenvolvido exclusivamente para fins educacionais, como parte das atividades práticas do curso da UNIP – Universidade Paulista (Ribeirão Preto).
 Ele representa a aplicação dos conhecimentos de desenvolvimento web, banco de dados, arquitetura de software e inteligência artificial aplicada.
 <br>
-🧑‍💻 Autoria e Créditos<br>
+
+## 🧑‍💻 Autoria e Créditos<br>
 👨‍🎓 Desenvolvido por:<br>
 Alunos Unip - Turma de ADS<br>
 Projeto acadêmico desenvolvido com o auxílio de ferramentas de IA e orientação acadêmica.
 
 
-🧠 Ferramentas de apoio à pesquisa e desenvolvimento:<br>
+## 🧠 Ferramentas de apoio à pesquisa e desenvolvimento:<br>
 ChatGPT 5<br>
 Gemini Pro<br>
 Claude Sonnet 4.5<br>
 Perplexity Pro<br>
 Grok<br>
 <br>
-📜 Licença<br>
+
+## 📜 Licença<br>
 📄 Este projeto é de uso acadêmico e não comercial.
 A redistribuição ou modificação é permitida apenas para fins educacionais e com devida menção ao autor original.
 <br>
+
 <p align="center"> ⭐ <b>Se este projeto te ajudou, não esqueça de deixar uma estrela no repositório!</b> ⭐ </p> ```
