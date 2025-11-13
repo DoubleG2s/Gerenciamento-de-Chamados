@@ -60,13 +60,13 @@ Este projeto foi criado com **fins acadêmicos** nas dependências da
 O projeto segue uma **estrutura modular organizada**:
 
 📂 Gerenciamento-de-Chamados/
-├── 📁 Models/ # Modelos de dados (Entidades, DTOs)
-├── 📁 Services/ # Lógica de negócio e integração com o banco de dados
-├── 📁 Pages/ # Páginas Blazor (UI)
-├── 📁 wwwroot/ # Recursos estáticos (CSS, JS, imagens)
-├── 📁 Data/ # Configuração e contexto do PostgreSQL
-├── 📄 appsettings.json # Configurações da aplicação
-└── 📄 Program.cs # Ponto de entrada da aplicação
+├── 📁 Models/ # Modelos de dados (Entidades, DTOs) <br>
+├── 📁 Services/ # Lógica de negócio e integração com o banco de dados <br>
+├── 📁 Pages/ # Páginas Blazor (UI) <br>
+├── 📁 wwwroot/ # Recursos estáticos (CSS, JS, imagens) <br>
+├── 📁 Data/ # Configuração e contexto do PostgreSQL <br>
+├── 📄 appsettings.json # Configurações da aplicação <br>
+└── 📄 Program.cs # Ponto de entrada da aplicação <br>
 
 
 A aplicação foi desenvolvida com uma **arquitetura em camadas**, separando claramente:
@@ -87,7 +87,7 @@ A aplicação foi desenvolvida com uma **arquitetura em camadas**, separando cla
 | ORM | Entity Framework Core |
 | Ferramentas de IA | ChatGPT 5, Gemini Pro, Claude Sonnet 4.5, Perplexity Pro, Grok |
 | IDE | Visual Studio / Visual Studio Code |
-| Hospedagem (opcional) | IIS ou Docker |
+| Hospedagem | AWS para Banco de Dados |
 
 ---
 
@@ -103,7 +103,7 @@ cd Gerenciamento-de-Chamados
 
 3. Configure o banco de dados PostgreSQL:
 Crie um banco de dados no PostgreSQL.
-Atualize a connectionString no arquivo appsettings.json.
+Atualize a connectionString no arquivo appsettings.Development.json.
 
 4. Execute as migrações (opcional):
 dotnet ef database update
