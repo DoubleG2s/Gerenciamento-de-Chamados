@@ -235,7 +235,7 @@ public class DashboardModel : PageModel
         return prioridade switch
         {
             PriorityLevel.Baixa => "success",
-            PriorityLevel.Média => "warning",
+            PriorityLevel.Media => "warning",
             PriorityLevel.Alta => "orange",
             PriorityLevel.Crítica => "danger",
             _ => "secondary"

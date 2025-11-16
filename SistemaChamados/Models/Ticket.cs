@@ -22,7 +22,7 @@ namespace SistemaChamados.Models
         [Display(Name = "Prioridade")]
         [Column("prioridade")]
         [StringLength(20)]
-        public PriorityLevel Prioridade { get; set; } = PriorityLevel.Média;
+        public PriorityLevel Prioridade { get; set; } = PriorityLevel.Media;
 
         [Display(Name = "Status")]
         [Column("status")]

@@ -54,7 +54,7 @@
                         <span class="badge status-@ticket.Status.ToString().ToLower()">@ticket.Status</span>
                         <span class="badge pri-@(ticket.Prioridade switch {
                             PriorityLevel.Baixa => "baixa",
-                            PriorityLevel.Média => "media",
+                            PriorityLevel.Media => "media",
                             PriorityLevel.Alta => "alta",
                             PriorityLevel.Crítica => "critica",
                             _ => "media"
@@ -134,7 +134,7 @@
                             <label asp-for="Input.Prioridade" class="form-label">Prioridade</label>
                             <select asp-for="Input.Prioridade" class="form-select">
                                 <option value="@PriorityLevel.Baixa">Baixa</option>
-                                <option value="@PriorityLevel.Média" selected>Média</option>
+                                <option value="@PriorityLevel.Media" selected>Média</option>
                                 <option value="@PriorityLevel.Alta">Alta</option>
                                 <option value="@PriorityLevel.Crítica">Crítica</option>
                             </select>

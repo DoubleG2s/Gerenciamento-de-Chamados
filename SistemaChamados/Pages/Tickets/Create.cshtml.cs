@@ -38,7 +38,7 @@ namespace SistemaChamados.Pages.Tickets
 
         public async Task<IActionResult> OnPostAsync()
         {
-            // Recarregar categorias para o caso de erro de validação
+            // Recarregar categorias para o caso de erro de validaï¿½ï¿½o
             Categorias = await _context.Categorias
                 .Where(c => c.Ativo)
                 .OrderBy(c => c.Nome)
@@ -49,28 +49,28 @@ namespace SistemaChamados.Pages.Tickets
                 return Page();
             }
 
-            // Buscar o usuário admin
+            // Buscar o usuï¿½rio admin
             var usuarioAdmin = await _context.Usuarios
                 .Where(u => u.TipoUsuario == "Admin" || u.Id == 1)
                 .FirstOrDefaultAsync();
 
             if (usuarioAdmin == null)
             {
-                ModelState.AddModelError("", "Nenhum usuário encontrado no sistema.");
+                ModelState.AddModelError("", "Nenhum usuï¿½rio encontrado no sistema.");
                 return Page();
             }
 
-            // ===== VALIDAÇÃO DE ANEXOS =====
+            // ===== VALIDAï¿½ï¿½O DE ANEXOS =====
             if (Input.Anexos != null && Input.Anexos.Any())
             {
                 const int maxFiles = 10;
                 const long maxSizeBytes = 10 * 1024 * 1024; // 10MB
                 var allowedExtensions = new[] { ".pdf", ".doc", ".docx", ".txt", ".jpg", ".jpeg", ".png", ".gif", ".zip", ".rar", ".xlsx", ".xls", ".pptx", ".ppt" };
 
-                // Validar número de arquivos
+                // Validar nï¿½mero de arquivos
                 if (Input.Anexos.Count > maxFiles)
                 {
-                    ModelState.AddModelError("Input.Anexos", $"Você pode enviar no máximo {maxFiles} arquivos.");
+                    ModelState.AddModelError("Input.Anexos", $"Vocï¿½ pode enviar no mï¿½ximo {maxFiles} arquivos.");
                     return Page();
                 }
 
@@ -80,15 +80,15 @@ namespace SistemaChamados.Pages.Tickets
                     // Validar tamanho
                     if (file.Length > maxSizeBytes)
                     {
-                        ModelState.AddModelError("Input.Anexos", $"O arquivo '{file.FileName}' excede o tamanho máximo de 10MB.");
+                        ModelState.AddModelError("Input.Anexos", $"O arquivo '{file.FileName}' excede o tamanho mï¿½ximo de 10MB.");
                         return Page();
                     }
 
-                    // Validar extensão
+                    // Validar extensï¿½o
                     var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
                     if (!allowedExtensions.Contains(extension))
                     {
-                        ModelState.AddModelError("Input.Anexos", $"O arquivo '{file.FileName}' possui um tipo não permitido. Tipos aceitos: {string.Join(", ", allowedExtensions)}");
+                        ModelState.AddModelError("Input.Anexos", $"O arquivo '{file.FileName}' possui um tipo nï¿½o permitido. Tipos aceitos: {string.Join(", ", allowedExtensions)}");
                         return Page();
                     }
                 }
@@ -120,7 +120,7 @@ namespace SistemaChamados.Pages.Tickets
                 {
                     var uploadPath = Path.Combine(_webHostEnvironment.WebRootPath, "uploads", "tickets", novoTicket.Id.ToString());
 
-                    // Criar diretório se não existir
+                    // Criar diretï¿½rio se nï¿½o existir
                     if (!Directory.Exists(uploadPath))
                     {
                         Directory.CreateDirectory(uploadPath);
@@ -128,7 +128,7 @@ namespace SistemaChamados.Pages.Tickets
 
                     foreach (var file in Input.Anexos)
                     {
-                        // Gerar nome único para o arquivo
+                        // Gerar nome ï¿½nico para o arquivo
                         var uniqueFileName = $"{Guid.NewGuid()}_{Path.GetFileName(file.FileName)}";
                         var filePath = Path.Combine(uploadPath, uniqueFileName);
 
@@ -173,23 +173,23 @@ namespace SistemaChamados.Pages.Tickets
 
         public class TicketInput
         {
-            [Required(ErrorMessage = "O título é obrigatório")]
-            [StringLength(120, ErrorMessage = "O título deve ter no máximo 120 caracteres")]
-            [Display(Name = "Título")]
+            [Required(ErrorMessage = "O tï¿½tulo ï¿½ obrigatï¿½rio")]
+            [StringLength(120, ErrorMessage = "O tï¿½tulo deve ter no mï¿½ximo 120 caracteres")]
+            [Display(Name = "Tï¿½tulo")]
             public string Titulo { get; set; } = string.Empty;
 
-            [Required(ErrorMessage = "A descrição é obrigatória")]
-            [StringLength(2000, MinimumLength = 10, ErrorMessage = "A descrição deve ter entre 10 e 2000 caracteres")]
-            [Display(Name = "Descrição")]
+            [Required(ErrorMessage = "A descriï¿½ï¿½o ï¿½ obrigatï¿½ria")]
+            [StringLength(2000, MinimumLength = 10, ErrorMessage = "A descriï¿½ï¿½o deve ter entre 10 e 2000 caracteres")]
+            [Display(Name = "Descriï¿½ï¿½o")]
             public string Descricao { get; set; } = string.Empty;
 
             [Required(ErrorMessage = "Selecione uma categoria")]
-            [Range(1, int.MaxValue, ErrorMessage = "Selecione uma categoria válida")]
+            [Range(1, int.MaxValue, ErrorMessage = "Selecione uma categoria vï¿½lida")]
             [Display(Name = "Categoria")]
             public int CategoriaId { get; set; }
 
             [Display(Name = "Prioridade")]
-            public PriorityLevel Prioridade { get; set; } = PriorityLevel.Média;
+            public PriorityLevel Prioridade { get; set; } = PriorityLevel.Media;
 
             [Display(Name = "Anexos")]
             public List<IFormFile>? Anexos { get; set; }

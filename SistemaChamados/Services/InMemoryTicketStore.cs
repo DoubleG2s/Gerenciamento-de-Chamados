@@ -50,7 +50,7 @@ namespace SistemaChamados.Services
                     Titulo = "Solicitação de acesso ao módulo financeiro",
                     Descricao = "Permissões ao módulo X.",
                     CategoriaId = 2,
-                    Prioridade = PriorityLevel.Média, // antes: Média
+                    Prioridade = PriorityLevel.Media, // antes: Média
                     Status = TicketStatus.Andamento,
                     SolicitanteId = 2,
                     CriadoEm = DateTime.SpecifyKind(new DateTime(2025, 01, 07), DateTimeKind.Utc)
