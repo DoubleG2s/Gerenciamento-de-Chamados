@@ -1,0 +1,483 @@
+﻿@page "/Relatorio/Dashboard"
+@model SistemaChamados.Pages.Relatorio.DashboardModel
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Roles = "Admin,Tecnico")]
+
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="container-fluid py-4">
+    <!-- Cabeçalho -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-1 fw-bold">📊 Dashboard e Relatórios</h1>
+            <p class="text-muted mb-0">Análise detalhada de chamados e métricas do sistema</p>
+        </div>
+        <div>
+            <button class="btn btn-outline-primary" onclick="window.print()">
+                <i class="bi bi-printer me-2"></i>Imprimir
+            </button>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Período</label>
+                    <select name="periodo" class="form-select" id="periodoSelect">
+                        <option value="7" selected>Últimos 7 dias</option>
+                        <option value="30">Últimos 30 dias</option>
+                        <option value="90">Últimos 90 dias</option>
+                        <option value="365">Último ano</option>
+                        <option value="custom">Personalizado</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3" id="dataInicioDiv" style="display: none;">
+                    <label class="form-label fw-semibold">Data Início</label>
+                    <input type="date" name="dataInicio" class="form-control"
+                           value="@Model.DataInicio?.ToString("yyyy-MM-dd")" />
+                </div>
+
+                <div class="col-md-3" id="dataFimDiv" style="display: none;">
+                    <label class="form-label fw-semibold">Data Fim</label>
+                    <input type="date" name="dataFim" class="form-control"
+                           value="@Model.DataFim?.ToString("yyyy-MM-dd")" />
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Categoria</label>
+                    <select name="categoriaId" class="form-select">
+                        <option value="">Todas</option>
+                        @foreach (var cat in Model.Categorias)
+                        {
+                            <option value="@cat.Id">@cat.Nome</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-search me-2"></i>Filtrar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Cards de Resumo -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1">Fechados no Período</p>
+                            <h3 class="fw-bold mb-0">@Model.TotalFechados</h3>
+                        </div>
+                        <div class="bg-success bg-opacity-10 p-3 rounded-circle">
+                            <i class="bi bi-check-circle text-success fs-4"></i>
+                        </div>
+                    </div>
+                    <small class="text-success">
+                        <i class="bi bi-arrow-up"></i> @Model.PercentualFechados%
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1">Tempo Médio (horas)</p>
+                            <h3 class="fw-bold mb-0">@Model.TempoMedioResolucao</h3>
+                        </div>
+                        <div class="bg-info bg-opacity-10 p-3 rounded-circle">
+                            <i class="bi bi-clock-history text-info fs-4"></i>
+                        </div>
+                    </div>
+                    <small class="text-muted">de resolução</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1">Taxa de Resolução</p>
+                            <h3 class="fw-bold mb-0">@Model.TaxaResolucao%</h3>
+                        </div>
+                        <div class="bg-primary bg-opacity-10 p-3 rounded-circle">
+                            <i class="bi bi-graph-up text-primary fs-4"></i>
+                        </div>
+                    </div>
+                    <small class="text-muted">do total aberto</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1">Abertos no Período</p>
+                            <h3 class="fw-bold mb-0">@Model.TotalAbertos</h3>
+                        </div>
+                        <div class="bg-warning bg-opacity-10 p-3 rounded-circle">
+                            <i class="bi bi-exclamation-circle text-warning fs-4"></i>
+                        </div>
+                    </div>
+                    <small class="text-muted">novos chamados</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficos -->
+    <div class="row g-3 mb-4">
+        <!-- Gráfico: Tickets Fechados por Dia -->
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0 fw-semibold">📈 Chamados Fechados por Dia</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="chartFechadosPorDia" style="max-height: 300px;"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráfico: Tickets por Status -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0 fw-semibold">📊 Por Status</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="chartPorStatus"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <!-- Gráfico: Top Categorias -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0 fw-semibold">🏷️ Top 10 Categorias Mais Solicitadas</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="chartTopCategorias" style="max-height: 350px;"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráfico: Tickets por Prioridade -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0 fw-semibold">⚡ Por Prioridade</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="chartPorPrioridade"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabelas de Ranking -->
+    <div class="row g-3 mb-4">
+        <!-- Top Usuários que Abriram -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-semibold">👤 Top 10 - Quem Mais Abriu Chamados</h5>
+                    <span class="badge bg-primary">@Model.TopSolicitantes.Count() total</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th width="50">#</th>
+                                    <th>Nome</th>
+                                    <th>Departamento</th>
+                                    <th width="100" class="text-center">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    int rankSolicitante = 1;
+                                }
+                                @foreach (var item in Model.TopSolicitantes)
+                                {
+                                    <tr>
+                                        <td class="text-center">
+                                            @if (rankSolicitante <= 3)
+                                            {
+                                                <span class="badge bg-warning text-dark">@rankSolicitante°</span>
+                                            }
+                                            else
+                                            {
+                                                <span>@rankSolicitante°</span>
+                                            }
+                                        </td>
+                                        <td class="fw-medium">@item.Nome</td>
+                                        <td>
+                                            <span class="badge bg-secondary">@(item.Departamento ?? "N/A")</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge bg-info">@item.Total</span>
+                                        </td>
+                                    </tr>
+                                    rankSolicitante++;
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Técnicos que Fecharam -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-semibold">🛠️ Top 10 - Quem Mais Fechou Chamados</h5>
+                    <span class="badge bg-success">@Model.TopTecnicos.Count() total</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th width="50">#</th>
+                                    <th>Nome</th>
+                                    <th>Cargo</th>
+                                    <th width="100" class="text-center">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    int rankTecnico = 1;
+                                }
+                                @foreach (var item in Model.TopTecnicos)
+                                {
+                                    <tr>
+                                        <td class="text-center">
+                                            @if (rankTecnico <= 3)
+                                            {
+                                                <span class="badge bg-success">@rankTecnico°</span>
+                                            }
+                                            else
+                                            {
+                                                <span>@rankTecnico°</span>
+                                            }
+                                        </td>
+                                        <td class="fw-medium">@item.Nome</td>
+                                        <td>
+                                            <span class="badge bg-primary">@(item.Cargo ?? "N/A")</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge bg-success">@item.Total</span>
+                                        </td>
+                                    </tr>
+                                    rankTecnico++;
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista Detalhada de Tickets Fechados -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-semibold">📋 Últimos Chamados Fechados</h5>
+            <span class="badge bg-success">@Model.UltimosFechados.Count() tickets</span>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th width="80">ID</th>
+                            <th>Título</th>
+                            <th>Categoria</th>
+                            <th>Aberto por</th>
+                            <th>Fechado por</th>
+                            <th>Prioridade</th>
+                            <th>Data Abertura</th>
+                            <th>Data Fechamento</th>
+                            <th width="100">Tempo (h)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var ticket in Model.UltimosFechados)
+                        {
+                            <tr>
+                                <td>
+                                    <a href="/Tickets/Details/@ticket.Id" class="text-decoration-none">
+                                        #@ticket.Id
+                                    </a>
+                                </td>
+                                <td class="fw-medium">@ticket.Titulo</td>
+                                <td>
+                                    <span class="badge bg-secondary">@ticket.CategoriaNome</span>
+                                </td>
+                                <td>@ticket.SolicitanteNome</td>
+                                <td>@ticket.TecnicoNome</td>
+                                <td>
+                                    <span class="badge bg-@ticket.PrioridadeCor">
+                                        @ticket.Prioridade
+                                    </span>
+                                </td>
+                                <td>
+                                    <small>@ticket.CriadoEm.ToString("dd/MM/yyyy HH:mm")</small>
+                                </td>
+                                <td>
+                                    <small>@ticket.FechadoEm?.ToString("dd/MM/yyyy HH:mm")</small>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge bg-info">@ticket.TempoResolucao</span>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <script>
+        // ===== Filtro de Período Personalizado =====
+        document.getElementById('periodoSelect').addEventListener('change', function() {
+            const customDivs = ['dataInicioDiv', 'dataFimDiv'];
+            if (this.value === 'custom') {
+                customDivs.forEach(id => document.getElementById(id).style.display = 'block');
+            } else {
+                customDivs.forEach(id => document.getElementById(id).style.display = 'none');
+            }
+        });
+
+        // ===== Gráfico: Fechados por Dia =====
+        const ctxFechadosPorDia = document.getElementById('chartFechadosPorDia').getContext('2d');
+        new Chart(ctxFechadosPorDia, {
+            type: 'line',
+            data: {
+                labels: @Html.Raw(Json.Serialize(Model.FechadosPorDia.Select(x => x.Data.ToString("dd/MM")))),
+                datasets: [{
+                    label: 'Chamados Fechados',
+                    data: @Html.Raw(Json.Serialize(Model.FechadosPorDia.Select(x => x.Total))),
+                    borderColor: 'rgb(75, 192, 192)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: { beginAtZero: true, ticks: { stepSize: 1 } }
+                }
+            }
+        });
+
+        // ===== Gráfico: Por Status =====
+        const ctxStatus = document.getElementById('chartPorStatus').getContext('2d');
+        new Chart(ctxStatus, {
+            type: 'doughnut',
+            data: {
+                labels: @Html.Raw(Json.Serialize(Model.TicketsPorStatus.Select(x => x.Status))),
+                datasets: [{
+                    data: @Html.Raw(Json.Serialize(Model.TicketsPorStatus.Select(x => x.Total))),
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.8)',
+                        'rgba(54, 162, 235, 0.8)',
+                        'rgba(255, 206, 86, 0.8)',
+                        'rgba(75, 192, 192, 0.8)',
+                        'rgba(153, 102, 255, 0.8)'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+
+        // ===== Gráfico: Top Categorias =====
+        const ctxCategorias = document.getElementById('chartTopCategorias').getContext('2d');
+        new Chart(ctxCategorias, {
+            type: 'bar',
+            data: {
+                labels: @Html.Raw(Json.Serialize(Model.TopCategorias.Select(x => x.Categoria))),
+                datasets: [{
+                    label: 'Total de Chamados',
+                    data: @Html.Raw(Json.Serialize(Model.TopCategorias.Select(x => x.Total))),
+                    backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    x: { beginAtZero: true, ticks: { stepSize: 1 } }
+                }
+            }
+        });
+
+        // ===== Gráfico: Por Prioridade =====
+        const ctxPrioridade = document.getElementById('chartPorPrioridade').getContext('2d');
+        new Chart(ctxPrioridade, {
+            type: 'pie',
+            data: {
+                labels: @Html.Raw(Json.Serialize(Model.TicketsPorPrioridade.Select(x => x.Prioridade))),
+                datasets: [{
+                    data: @Html.Raw(Json.Serialize(Model.TicketsPorPrioridade.Select(x => x.Total))),
+                    backgroundColor: [
+                        'rgba(40, 167, 69, 0.8)',
+                        'rgba(255, 193, 7, 0.8)',
+                        'rgba(255, 133, 27, 0.8)',
+                        'rgba(220, 53, 69, 0.8)'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+    </script>
+}

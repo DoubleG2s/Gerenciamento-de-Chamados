@@ -1253,3 +1253,15 @@ body {
     border-color: #ffe69c !important;
 }
 
+.kpi-card:hover {
+    transform: translateY(-5px);
+    transition: all 0.3s ease;
+}
+
+@media print {
+    .btn, .card-header button {
+        display: none !important;
+    }
+}
+
+

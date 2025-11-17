@@ -1,0 +1,7 @@
+database-tickets-pim.cn2ys24msyzj.sa-east-1.rds.amazonaws.com
+
+database-tickets-pim
+
+psql -h database-tickets-pim.cn2ys24msyzj.sa-east-1.rds.amazonaws.com -U postgres -d database_tickets_pim -p 5432 -f backup.sql
+
+SeF2ew5xutre
