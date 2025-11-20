@@ -1,7 +1,10 @@
-using Microsoft.EntityFrameworkCore;        // <- necessário para AddDbContext/UseNpgsql
+using Microsoft.EntityFrameworkCore;        // <- necessï¿½rio para AddDbContext/UseNpgsql
 using SistemaChamados.Data;                 // <- seu AppDbContext
 using SistemaChamados.Services;             // <- InMemoryTicketStore
-using Microsoft.AspNetCore.Authentication.Cookies; // <- Autenticação por Cookies
+using Microsoft.AspNetCore.Authentication.Cookies; 
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,10 +14,28 @@ builder.Services.AddRazorPages();
 //Suporte a rotas de API
 builder.Services.AddControllers();
 
-// Mock store (singleton em memória)
+// Mock store (singleton em memï¿½ria)
 builder.Services.AddSingleton<InMemoryTicketStore>();
-
-
+var jwtKey = builder.Configuration["Jwt:Key"];
+var key = Encoding.ASCII.GetBytes(jwtKey);
+builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = "JwtBearer";
+        options.DefaultChallengeScheme = "JwtBearer";
+    })
+    .AddJwtBearer("JwtBearer", options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(key),
+            ClockSkew = TimeSpan.Zero
+        };
+    });
 
 
 builder.Services
@@ -26,15 +47,15 @@ builder.Services
         opt.AccessDeniedPath = "/AccessDenied";
         opt.SlidingExpiration = true;
         opt.ExpireTimeSpan = TimeSpan.FromHours(8);
-        opt.Cookie.HttpOnly = true;  // ADICIONAR (segurança)
-        opt.Cookie.IsEssential = true;  // ADICIONAR (segurança)
+        opt.Cookie.HttpOnly = true;  // ADICIONAR (seguranï¿½a)
+        opt.Cookie.IsEssential = true;  // ADICIONAR (seguranï¿½a)
     });
 
 builder.Services.AddAuthorization();
 
 // EF Core + Npgsql usando DefaultConnection
 var connString = builder.Configuration.GetConnectionString("DefaultConnection")
-    ?? throw new InvalidOperationException("ConnectionStrings:DefaultConnection não configurada.");
+    ?? throw new InvalidOperationException("ConnectionStrings:DefaultConnection nï¿½o configurada.");
 
 builder.Services.AddDbContext<AppDbContext>(opt =>
 {
@@ -54,7 +75,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthentication(); // <- importante ser antes do UseAuthorization
-//Middleware para prevenir cache de páginas autenticadas
+//Middleware para prevenir cache de pï¿½ginas autenticadas
 app.Use(async (context, next) =>
 {
     context.Response.Headers["Cache-Control"] = "no-cache, no-store, must-revalidate";
@@ -76,7 +97,7 @@ app.MapGet("/ping-db", async (AppDbContext db) =>
     return Results.Ok(new { connected = ok });
 });
 
-// sua rota inicial -> página de Login
+// sua rota inicial -> pï¿½gina de Login
 app.MapGet("/", () => Results.Redirect("/Login"));
 
 app.Run();
