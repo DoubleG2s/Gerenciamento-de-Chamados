@@ -7,7 +7,6 @@ using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
-
 namespace SistemaChamados.Controllers
 {
     [ApiController]
@@ -15,33 +14,32 @@ namespace SistemaChamados.Controllers
     public class MobileAuthController : ControllerBase
     {
         private readonly AppDbContext _context;
-        private String _Key;
+        private readonly IConfiguration _config;
 
         public MobileAuthController(AppDbContext context, IConfiguration config)
         {
             _context = context;
-            _Key = config["Jwt:Key"];
+            _config = config;
         }
-      
 
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto dto)
         {
-            var key = Encoding.UTF8.GetBytes(_Key);
             var usuario = await _context.Usuarios
                 .FirstOrDefaultAsync(u => u.Email == dto.Email && u.Ativo);
 
             if (usuario == null)
                 return Ok(new { sucesso = false, mensagem = "Usuário não encontrado." });
 
-            // 🔐 Verificação com BCrypt
+            // BCrypt
             bool senhaValida = BCrypt.Net.BCrypt.Verify(dto.Senha, usuario.SenhaHash);
 
             if (!senhaValida)
                 return Ok(new { sucesso = false, mensagem = "Senha incorreta." });
 
-            // 🔑 Gerar JWT
+            // JWT
             var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.UTF8.GetBytes(_config["Jwt:Key"]);
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
@@ -55,6 +53,9 @@ namespace SistemaChamados.Controllers
 
                 Expires = DateTime.UtcNow.AddHours(2),
 
+                Issuer   = _config["Jwt:Issuer"],     // CORRETO ✔️
+                Audience = _config["Jwt:Audience"],  // CORRETO ✔️
+
                 SigningCredentials = new SigningCredentials(
                     new SymmetricSecurityKey(key),
                     SecurityAlgorithms.HmacSha256Signature
@@ -62,12 +63,11 @@ namespace SistemaChamados.Controllers
             };
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
-            var jwt = tokenHandler.WriteToken(token);
 
             return Ok(new
             {
                 sucesso = true,
-                token = jwt,
+                token = tokenHandler.WriteToken(token),
                 usuario = new
                 {
                     usuario.Id,

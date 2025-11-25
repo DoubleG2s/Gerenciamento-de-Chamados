@@ -1,10 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Mvc;
 using SistemaChamados.Data;
 using SistemaChamados.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace SistemaChamados.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("api/mobile/ticket")]
     public class MobileTicketsController : Controller
     {
@@ -14,10 +17,11 @@ namespace SistemaChamados.Controllers
         {
             _context = context;
         }
-        [HttpGet("{id}")]
-        public ActionResult getTickets(int id)
+        [HttpGet]
+        public ActionResult getTickets()
         {
-            List<Ticket> tickets = _context.Tickets.Where(p => p.SolicitanteId == id).ToList(); ;
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            List<Ticket> tickets = _context.Tickets.Where(p => p.SolicitanteId == userId).ToList(); ;
 
             if (tickets == null) {
                 return NotFound();
