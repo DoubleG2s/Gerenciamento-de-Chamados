@@ -11,10 +11,10 @@
             <div class="card shadow-lg">
                 <div class="card-header bg-gradient-primary text-white">
                     <div class="d-flex align-items-center">
-                        <i class="fas fa-robot me-3"></i>
+                        <i class="fas fa-robot me-3 text-dark"></i>
                         <div>
-                            <h4 class="mb-0">Assistente Virtual</h4>
-                            <small class="opacity-75">Estou aqui para ajudar com suas dúvidas</small>
+                            <h4 class="mb-0 text-dark">Assistente Virtual</h4>
+                            <small class="opacity-75 text-muted">Estou aqui para ajudar com suas dúvidas</small>
                         </div>
                         <div class="ms-auto">
                             <span id="status-indicator" class="badge bg-success">Online</span>
@@ -26,7 +26,7 @@
                     <div id="chat-container" class="chat-container">
                         <div class="welcome-message text-center py-4">
                             <div class="avatar avatar-lg mb-3">
-                                <i class="fas fa-robot"></i>
+                                <i class="fas fa-robot" ></i>
                             </div>
                             <h5>Olá! 👋</h5>
                             <p class="text-muted">Como posso ajudar você hoje?</p>
@@ -44,15 +44,15 @@
                                       maxlength="500"></textarea>
                             <button type="button" 
                                     id="audio-toggle" 
-                                    class="btn btn-outline-secondary"
+                                    class="btn btn-outline-secondary" style="cursor: pointer;"
                                     title="Ativar/Desativar áudio">
                                 <i class="fas fa-volume-up"></i>
                             </button>
                         </div>
                         <button type="submit" 
                                 id="send-button" 
-                                class="btn btn-primary px-4">
-                            <i class="fas fa-paper-plane"></i>
+                                class="btn btn-primary px-4" style="cursor: pointer;">
+                            <i class="fas fa-paper-plane" style="color: white;"></i>
                         </button>
                     </form>
                     
@@ -62,8 +62,8 @@
                             Digite "resolvido" para encerrar o atendimento
                         </small>
                         <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" id="audio-enabled" checked>
-                            <label class="form-check-label" for="audio-enabled">
+                            <input class="form-check-input" style="cursor: pointer;" type="checkbox" id="audio-enabled" checked>
+                            <label class="form-check-label" style="cursor: pointer;" for="audio-enabled">
                                 Áudio
                             </label>
                         </div>
