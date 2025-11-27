@@ -22,8 +22,8 @@ namespace SistemaChamados.Controllers
         public ActionResult getTickets()
         {
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-            List<TicketResponse> tickets = _context.Tickets.Where(p => p.SolicitanteId == userId)
-                .Select(t => new TicketResponse
+            List<TicketsResponse> tickets = _context.Tickets.Where(p => p.SolicitanteId == userId)
+                .Select(t => new TicketsResponse
                 {
                     Id = t.Id,
                     Titulo = t.Titulo,

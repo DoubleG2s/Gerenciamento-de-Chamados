@@ -1,6 +1,6 @@
 namespace SistemaChamados.Models.dto
 {
-    public class TicketResponse
+    public class TicketsResponse
     {
         public int Id { get; set; }
         public string Titulo { get; set; }
