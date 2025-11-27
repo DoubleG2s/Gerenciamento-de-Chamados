@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using SistemaChamados.Data;
 using SistemaChamados.Models;
 using Microsoft.AspNetCore.Authorization;
+using SistemaChamados.Models.dto;
 
 namespace SistemaChamados.Controllers
 {
@@ -21,7 +22,17 @@ namespace SistemaChamados.Controllers
         public ActionResult getTickets()
         {
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-            List<Ticket> tickets = _context.Tickets.Where(p => p.SolicitanteId == userId).ToList(); ;
+            List<TicketResponse> tickets = _context.Tickets.Where(p => p.SolicitanteId == userId)
+                .Select(t => new TicketResponse
+                {
+                    Id = t.Id,
+                    Titulo = t.Titulo,
+                    Descricao = t.Descricao,
+                    Prioridade = t.Prioridade.ToString(),
+                    Status = t.Status.ToString(),
+                    CriadoEm = t.CriadoEm,
+                    AtualizadoEm = t.AtualizadoEm
+                }).ToList();
 
             if (tickets == null) {
                 return NotFound();
