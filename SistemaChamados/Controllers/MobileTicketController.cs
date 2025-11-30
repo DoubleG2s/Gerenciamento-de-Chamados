@@ -44,12 +44,13 @@ public class MobileTicketController : ControllerBase
             Comentarios = ticket.Comentarios
                 .Select(c => new ComentarioResponse
                 {
-                    Autor = c.Usuario.Nome,
-                    Data = c.CriadoEm.ToString("dd/MM/yyyy HH:mm"),
-                    Mensagem = c.Comentario
+                    Autor = c.Usuario.Nome ?? "Desconhecido",
+                    Data = c.CriadoEm.ToString("dd/MM/yyyy HH:mm") ?? "",
+                    Mensagem = c.Comentario ?? ""
                 })
                 .ToList()
         };
+    
     }
 }
 

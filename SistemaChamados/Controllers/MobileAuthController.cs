@@ -27,7 +27,7 @@ namespace SistemaChamados.Controllers
         {
             var usuario = await _context.Usuarios
                 .FirstOrDefaultAsync(u => u.Email == dto.Email && u.Ativo);
-
+    
             if (usuario == null)
                 return Ok(new { sucesso = false, mensagem = "Usuário não encontrado." });
 
