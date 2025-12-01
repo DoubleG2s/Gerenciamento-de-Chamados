@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using SistemaChamados.Data;
 using SistemaChamados.Models;
@@ -8,7 +9,7 @@ using SistemaChamados.Models.dto;
 namespace SistemaChamados.Controllers
 {
     [ApiController]
-    [Authorize]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("api/mobile/ticket")]
     public class MobileTicketsController : Controller
     {

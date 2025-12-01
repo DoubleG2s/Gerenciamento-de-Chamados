@@ -18,13 +18,25 @@ builder.Services.AddControllers();
 builder.Services.AddSingleton<InMemoryTicketStore>();
 var jwtKey = builder.Configuration["Jwt:Key"];
 var key = Encoding.ASCII.GetBytes(jwtKey);
+
 builder.Services.AddAuthentication(options =>
     {
-        options.DefaultAuthenticateScheme = "JwtBearer";
-        options.DefaultChallengeScheme = "JwtBearer";
+        options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
     })
-    .AddJwtBearer("JwtBearer", options =>
+    .AddCookie(opt =>
     {
+        opt.LoginPath = "/Login";
+        opt.LogoutPath = "/Logout";
+        opt.AccessDeniedPath = "/AccessDenied";
+        opt.SlidingExpiration = true;
+        opt.ExpireTimeSpan = TimeSpan.FromHours(8);
+    })
+    .AddJwtBearer("Bearer", options =>
+    {
+        var jwtKey = builder.Configuration["Jwt:Key"];
+        var key = Encoding.ASCII.GetBytes(jwtKey);
+
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
@@ -37,19 +49,6 @@ builder.Services.AddAuthentication(options =>
         };
     });
 
-
-builder.Services
-    .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(opt =>
-    {
-        opt.LoginPath = "/Login";
-        opt.LogoutPath = "/Logout";
-        opt.AccessDeniedPath = "/AccessDenied";
-        opt.SlidingExpiration = true;
-        opt.ExpireTimeSpan = TimeSpan.FromHours(8);
-        opt.Cookie.HttpOnly = true;  // ADICIONAR (seguran�a)
-        opt.Cookie.IsEssential = true;  // ADICIONAR (seguran�a)
-    });
 
 builder.Services.AddAuthorization();
 
