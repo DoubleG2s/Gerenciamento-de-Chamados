@@ -1,4 +1,4 @@
-﻿@{
+@{
     var title = ViewData["Title"] as string ?? "Sistema de Chamados";
     bool isUsuario = User.IsInRole("Usuario");
     bool isTecnicoOrAdmin = User.IsInRole("Tecnico") || User.IsInRole("Admin");
@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    @RenderSection("Styles", required: false)
 
 </head>
 <body class="app">
@@ -80,6 +81,12 @@
 
         <div class="side-group">
             <div class="side-title">Sistema</div>
+
+            @* Chat IA - todos os usuários *@
+            <a asp-page="/Chat/Index"
+               class="side-link @(Context.Request.Path.Value?.StartsWith("/Chat", StringComparison.OrdinalIgnoreCase) == true ? "active" : null)">
+                <i class="bi bi-chat-dots i"></i> Assistente Virtual
+            </a>
 
             @* Configurações - todos os usuários (mas com restrições internas) *@
             <a asp-page="/Configs/Configurar"

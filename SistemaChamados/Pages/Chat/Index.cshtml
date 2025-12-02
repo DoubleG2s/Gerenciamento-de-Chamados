@@ -1,0 +1,444 @@
+@page
+@model SistemaChamados.Pages.Chat.IndexModel
+@{
+    ViewData["Title"] = "Assistente Virtual";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8">
+            <div class="card shadow-lg">
+                <div class="card-header bg-gradient-primary text-white">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-robot me-3"></i>
+                        <div>
+                            <h4 class="mb-0">Assistente Virtual</h4>
+                            <small class="opacity-75">Estou aqui para ajudar com suas dúvidas</small>
+                        </div>
+                        <div class="ms-auto">
+                            <span id="status-indicator" class="badge bg-success">Online</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-body p-0">
+                    <div id="chat-container" class="chat-container">
+                        <div class="welcome-message text-center py-4">
+                            <div class="avatar avatar-lg mb-3">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <h5>Olá! 👋</h5>
+                            <p class="text-muted">Como posso ajudar você hoje?</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-footer bg-light">
+                    <form id="chat-form" class="d-flex align-items-end">
+                        <div class="input-group me-2">
+                            <textarea id="message-input" 
+                                      class="form-control" 
+                                      rows="1"
+                                      placeholder="Digite sua mensagem..."
+                                      maxlength="500"></textarea>
+                            <button type="button" 
+                                    id="audio-toggle" 
+                                    class="btn btn-outline-secondary"
+                                    title="Ativar/Desativar áudio">
+                                <i class="fas fa-volume-up"></i>
+                            </button>
+                        </div>
+                        <button type="submit" 
+                                id="send-button" 
+                                class="btn btn-primary px-4">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </form>
+                    
+                    <div class="d-flex justify-content-between align-items-center mt-2">
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Digite "resolvido" para encerrar o atendimento
+                        </small>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="audio-enabled" checked>
+                            <label class="form-check-label" for="audio-enabled">
+                                Áudio
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .chat-container {
+            height: 500px;
+            overflow-y: auto;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        }
+        
+        .message {
+            margin: 1rem;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        .message-user {
+            text-align: right;
+        }
+        
+        .message-bot {
+            text-align: left;
+        }
+        
+        .message-bubble {
+            display: inline-block;
+            max-width: 70%;
+            padding: 0.75rem 1rem;
+            border-radius: 1rem;
+            position: relative;
+            word-wrap: break-word;
+        }
+        
+        .message-user .message-bubble {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+            border-bottom-right-radius: 0.25rem;
+        }
+        
+        .message-bot .message-bubble {
+            background: white;
+            color: #333;
+            border: 1px solid #dee2e6;
+            border-bottom-left-radius: 0.25rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .message-time {
+            font-size: 0.75rem;
+            color: #6c757d;
+            margin-top: 0.25rem;
+        }
+        
+        .typing-indicator {
+            display: none;
+            padding: 0.75rem 1rem;
+            background: white;
+            border-radius: 1rem;
+            border-bottom-left-radius: 0.25rem;
+            border: 1px solid #dee2e6;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            width: fit-content;
+        }
+        
+        .typing-dots {
+            display: inline-block;
+        }
+        
+        .typing-dots span {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #007bff;
+            margin: 0 1px;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+        
+        .typing-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .typing-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        @@keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @@keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-10px);
+            }
+        }
+        
+        .welcome-message {
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        @@keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            margin: 0 auto;
+        }
+        
+        #message-input {
+            resize: none;
+            border-radius: 1.5rem;
+            border: 1px solid #ced4da;
+            padding: 0.75rem 1rem;
+        }
+        
+        #message-input:focus {
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+            border-color: #007bff;
+        }
+        
+        .btn-primary {
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .resolved-message {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            text-align: center;
+            padding: 1rem;
+            border-radius: 1rem;
+            margin: 1rem;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script src="~/js/chat-tts.js"></script>
+    <script>
+        class ChatManager {
+            constructor() {
+                this.chatContainer = document.getElementById('chat-container');
+                this.messageInput = document.getElementById('message-input');
+                this.chatForm = document.getElementById('chat-form');
+                this.audioEnabled = document.getElementById('audio-enabled');
+                this.isResolved = false;
+                
+                this.initializeEventListeners();
+                this.checkConnectionStatus();
+            }
+            
+            initializeEventListeners() {
+                this.chatForm.addEventListener('submit', (e) => this.handleSubmit(e));
+                this.messageInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        this.handleSubmit(e);
+                    }
+                });
+                
+                this.messageInput.addEventListener('input', () => {
+                    this.autoResize();
+                });
+            }
+            
+            autoResize() {
+                this.messageInput.style.height = 'auto';
+                this.messageInput.style.height = Math.min(this.messageInput.scrollHeight, 120) + 'px';
+            }
+            
+            async handleSubmit(e) {
+                e.preventDefault();
+                
+                if (this.isResolved) {
+                    this.showMessage('O atendimento já foi encerrado. Obrigado!', 'bot');
+                    return;
+                }
+                
+                const message = this.messageInput.value.trim();
+                if (!message) return;
+                
+                this.addMessage(message, 'user');
+                this.messageInput.value = '';
+                this.autoResize();
+                
+                await this.sendMessage(message);
+            }
+            
+            addMessage(content, sender) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message message-${sender}`;
+                
+                const bubble = document.createElement('div');
+                bubble.className = 'message-bubble';
+                bubble.textContent = content;
+                
+                const time = document.createElement('div');
+                time.className = 'message-time';
+                time.textContent = new Date().toLocaleTimeString('pt-BR', { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                });
+                
+                messageDiv.appendChild(bubble);
+                messageDiv.appendChild(time);
+                
+                this.chatContainer.appendChild(messageDiv);
+                this.scrollToBottom();
+            }
+            
+            showTypingIndicator() {
+                const typingDiv = document.createElement('div');
+                typingDiv.id = 'typing-indicator';
+                typingDiv.className = 'message message-bot';
+                typingDiv.innerHTML = `
+                    <div class="typing-indicator">
+                        <div class="typing-dots">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </div>
+                `;
+                this.chatContainer.appendChild(typingDiv);
+                this.scrollToBottom();
+            }
+            
+            hideTypingIndicator() {
+                const indicator = document.getElementById('typing-indicator');
+                if (indicator) {
+                    indicator.remove();
+                }
+            }
+            
+            async sendMessage(message) {
+                this.showTypingIndicator();
+                
+                try {
+                    const response = await fetch('/api/chat/send', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            message: message,
+                            generateAudio: this.audioEnabled.checked
+                        })
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error('Erro na resposta do servidor');
+                    }
+                    
+                    const data = await response.json();
+                    
+                    this.hideTypingIndicator();
+                    this.addMessage(data.response, 'bot');
+                    
+                    if (data.isResolved) {
+                        this.isResolved = true;
+                        this.showResolvedMessage();
+                    }
+                    
+                    // Tocar áudio se disponível
+                    if (data.audioBase64 && this.audioEnabled.checked) {
+                        this.playAudio(data.audioBase64);
+                    }
+                    
+                } catch (error) {
+                    this.hideTypingIndicator();
+                    console.error('Erro:', error);
+                    this.addMessage('Desculpe, ocorreu um erro ao processar sua mensagem. Tente novamente.', 'bot');
+                }
+            }
+            
+            showResolvedMessage() {
+                const resolvedDiv = document.createElement('div');
+                resolvedDiv.className = 'message message-bot';
+                resolvedDiv.innerHTML = `
+                    <div class="resolved-message">
+                        <i class="fas fa-check-circle me-2"></i>
+                        Atendimento encerrado com sucesso!
+                    </div>
+                `;
+                this.chatContainer.appendChild(resolvedDiv);
+                this.scrollToBottom();
+            }
+            
+            playAudio(base64Audio) {
+                try {
+                    // Primeiro tenta tocar o áudio base64 se existir e for válido
+                    if (base64Audio && base64Audio.length > 100) {
+                        const audio = new Audio(`data:audio/wav;base64,${base64Audio}`);
+                        audio.volume = 0.7;
+                        audio.play().catch(error => {
+                            console.log('Erro ao tocar áudio base64:', error);
+                            // Fallback para Web Speech API via chat-tts.js
+                            this.playAudioWithWebSpeech();
+                        });
+                    } else {
+                        // Se não houver áudio base64 válido, usa Web Speech API via chat-tts.js
+                        this.playAudioWithWebSpeech();
+                    }
+                } catch (error) {
+                    console.log('Erro ao processar áudio, usando Web Speech API:', error);
+                    this.playAudioWithWebSpeech();
+                }
+            }
+            
+            playAudioWithWebSpeech() {
+                // Usa a última mensagem do bot para TTS via chat-tts.js
+                const botMessages = this.chatContainer.querySelectorAll('.message-bot .message-bubble');
+                if (botMessages.length > 0) {
+                    const lastMessage = botMessages[botMessages.length - 1].textContent;
+                    speakChatMessage(lastMessage);
+                }
+            }
+            
+            scrollToBottom() {
+                this.chatContainer.scrollTop = this.chatContainer.scrollHeight;
+            }
+            
+            async checkConnectionStatus() {
+                try {
+                    const response = await fetch('/api/chat/status');
+                    const data = await response.json();
+                    
+                    const statusIndicator = document.getElementById('status-indicator');
+                    if (data.status === 'online') {
+                        statusIndicator.className = 'badge bg-success';
+                        statusIndicator.textContent = 'Online';
+                    } else {
+                        statusIndicator.className = 'badge bg-danger';
+                        statusIndicator.textContent = 'Offline';
+                    }
+                } catch (error) {
+                    console.log('Erro ao verificar status:', error);
+                }
+            }
+        }
+        
+        // Inicializar o chat quando a página carregar
+        document.addEventListener('DOMContentLoaded', () => {
+            new ChatManager();
+        });
+    </script>
+}

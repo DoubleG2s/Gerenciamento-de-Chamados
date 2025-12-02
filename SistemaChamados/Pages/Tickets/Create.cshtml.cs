@@ -189,7 +189,7 @@ namespace SistemaChamados.Pages.Tickets
             public int CategoriaId { get; set; }
 
             [Display(Name = "Prioridade")]
-            public PriorityLevel Prioridade { get; set; } = PriorityLevel.Media;
+            public PriorityLevel Prioridade { get; set; } = PriorityLevel.Média;
 
             [Display(Name = "Anexos")]
             public List<IFormFile>? Anexos { get; set; }
