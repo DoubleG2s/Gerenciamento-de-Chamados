@@ -1,6 +1,6 @@
-using Microsoft.EntityFrameworkCore;        // <- necess�rio para AddDbContext/UseNpgsql
-using SistemaChamados.Data;                 // <- seu AppDbContext
-using SistemaChamados.Services;             // <- InMemoryTicketStore
+using Microsoft.EntityFrameworkCore;        
+using SistemaChamados.Data;                 
+using SistemaChamados.Services;            
 using Microsoft.AspNetCore.Authentication.Cookies; 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -8,13 +8,10 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Razor Pages
 builder.Services.AddRazorPages();
 
-//Suporte a rotas de API
 builder.Services.AddControllers();
 
-// Mock store (singleton em mem�ria)
 builder.Services.AddSingleton<InMemoryTicketStore>();
 var jwtKey = builder.Configuration["Jwt:Key"];
 var key = Encoding.ASCII.GetBytes(jwtKey);
@@ -52,14 +49,13 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 
-// EF Core + Npgsql usando DefaultConnection
 var connString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("ConnectionStrings:DefaultConnection n�o configurada.");
 
 builder.Services.AddDbContext<AppDbContext>(opt =>
 {
     opt.UseNpgsql(connString);
-    AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true); // Para compatibilidade com timestamps
+    AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 });
 
 var app = builder.Build();
@@ -73,8 +69,7 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
-app.UseAuthentication(); // <- importante ser antes do UseAuthorization
-//Middleware para prevenir cache de p�ginas autenticadas
+app.UseAuthentication(); 
 app.Use(async (context, next) =>
 {
     context.Response.Headers["Cache-Control"] = "no-cache, no-store, must-revalidate";
@@ -82,21 +77,20 @@ app.Use(async (context, next) =>
     context.Response.Headers["Expires"] = "0";
     await next();
 });
-app.UseAuthorization(); // <- importante ser depois do UseAuthentication
+app.UseAuthorization(); 
 
 app.MapRazorPages();
 
-//Ativa as rota de API
+
 app.MapControllers();
 
-// Endpoint de teste do DB (opcional)
+
 app.MapGet("/ping-db", async (AppDbContext db) =>
 {
-    var ok = await db.Database.CanConnectAsync();  // <- requer EF Core instalado
+    var ok = await db.Database.CanConnectAsync(); 
     return Results.Ok(new { connected = ok });
 });
 
-// sua rota inicial -> p�gina de Login
 app.MapGet("/", () => Results.Redirect("/Login"));
 
 app.Run();

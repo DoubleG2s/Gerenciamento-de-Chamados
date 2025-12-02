@@ -53,8 +53,8 @@ namespace SistemaChamados.Controllers
 
                 Expires = DateTime.UtcNow.AddHours(2),
 
-                Issuer   = _config["Jwt:Issuer"],     // CORRETO ✔️
-                Audience = _config["Jwt:Audience"],  // CORRETO ✔️
+                Issuer   = _config["Jwt:Issuer"], 
+                Audience = _config["Jwt:Audience"], 
 
                 SigningCredentials = new SigningCredentials(
                     new SymmetricSecurityKey(key),

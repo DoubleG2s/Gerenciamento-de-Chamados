@@ -31,8 +31,7 @@ namespace SistemaChamados.Controllers
         {
             if (string.IsNullOrWhiteSpace(dto.Comentario))
                 return BadRequest("O comentário não pode estar vazio.");
-
-            // 🔐 Busca o ID do usuário logado
+            
             var claim = User.FindFirst(ClaimTypes.NameIdentifier);
             if (claim == null)
                 return Unauthorized("Claim 'NameIdentifier' não encontrada.");
@@ -59,8 +58,7 @@ namespace SistemaChamados.Controllers
 
             _db.ComentariosTicket.Add(novoComentario);
             await _db.SaveChangesAsync();
-
-            // busca o nome/username do autor
+            
             var usuario = await _db.Usuarios
                 .FirstOrDefaultAsync(u => u.Id == usuarioId);
 

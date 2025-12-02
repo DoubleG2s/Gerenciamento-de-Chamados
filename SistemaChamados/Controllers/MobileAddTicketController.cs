@@ -58,24 +58,17 @@ public class MobileTicketsController : Controller
 
         PriorityLevel ParsePrioridade(string prioridadeString)
         {
-            // 1. Tenta converter a string para o tipo Enum 'PrioridadeTicket'.
-            //    'true' no segundo argumento indica que a comparação é case-insensitive.
             if (Enum.TryParse<PriorityLevel>(prioridadeString, true, out var result)) 
             {
-                // 2. Se a conversão for bem-sucedida, retorna o Enum.
                 return result;
             }
-        
-            // 3. Se a string não for válida, retorna um valor padrão seguro.
-            //    (Baixa ou Média são as melhores opções seguras)
+            
             return PriorityLevel.Baixa; 
         }
-
-        // 4. Salvar no Banco de Dados
+        
         _context.Tickets.Add(novoTicket);
         await _context.SaveChangesAsync();
-
-        // 5. Retornar Sucesso
+        
         return StatusCode(201, novoTicket);
     }
 }
